@@ -11,20 +11,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b1020;        /* slate-950ish */
-      --card: #0f172a;      /* slate-900 */
-      --muted: #94a3b8;     /* slate-400 */
-      --text: #e5e7eb;      /* gray-200 */
-      --brand: #22d3ee;     /* cyan-400 */
-      --brand-2: #38bdf8;   /* sky-400 */
+      --bg: #0b1020;
+      --card: #0f172a;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --brand: #22d3ee;
+      --brand-2: #38bdf8;
       --ring: rgba(34, 211, 238, .4);
-      --ok: #34d399;        /* emerald-400 */
-      --warn: #fbbf24;      /* amber-400 */
+      --ok: #34d399;
+      --warn: #fbbf24;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body {
-      margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
       background: radial-gradient(1200px 800px at 80% -10%, rgba(34,211,238,.06), transparent 60%),
                   radial-gradient(900px 700px at -10% -20%, rgba(56,189,248,.06), transparent 60%),
                   var(--bg);
@@ -33,75 +33,18 @@
     a { color: var(--brand-2); text-decoration: none; }
     a:hover { text-decoration: underline; }
     .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
-    header {
-      position: sticky; top: 0; backdrop-filter: blur(10px);
-      background: linear-gradient(to bottom, rgba(11,16,32,.9), rgba(11,16,32,.6));
-      border-bottom: 1px solid rgba(148,163,184,.15);
-      z-index: 20;
-    }
+    header { position: sticky; top: 0; backdrop-filter: blur(10px); background: linear-gradient(to bottom, rgba(11,16,32,.9), rgba(11,16,32,.6)); border-bottom: 1px solid rgba(148,163,184,.15); z-index: 20; }
     nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 24px; }
     .logo { font-weight: 800; letter-spacing: .3px; }
-    .chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; background: rgba(148,163,184,.08); color: var(--muted); font-size: 12px; border: 1px solid rgba(148,163,184,.15) }
     .navlinks a { margin-left: 18px; font-weight: 600; color: var(--text); opacity: .85; }
     .navlinks a:hover { opacity: 1; }
-
-    .hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 40px; padding: 56px 24px 28px; align-items: center; }
-    @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } }
+    .card { background: linear-gradient(180deg, rgba(16,24,39,.9), rgba(16,24,39,.8)); border: 1px solid rgba(148,163,184,.12); border-radius: 18px; padding: 20px; }
     h1 { font-size: clamp(32px, 4vw, 54px); line-height: 1.1; margin: 0 0 18px; letter-spacing: -.4px; }
-    .subtitle { font-size: clamp(16px, 2vw, 20px); color: var(--muted); margin-bottom: 22px; }
-    .cta { display: flex; gap: 12px; flex-wrap: wrap; }
-    .btn { display:inline-flex; align-items:center; gap:10px; padding:12px 16px; border-radius:12px; border:1px solid rgba(148,163,184,.2); background:#0e172a; color:var(--text); font-weight:700; }
-    .btn.primary { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color:#041016; border: none; }
-    .btn:hover { box-shadow: 0 8px 30px -12px var(--ring); transform: translateY(-1px); }
-
-    .card { background: linear-gradient(180deg, rgba(16,24,39,.9), rgba(16,24,39,.8));
-            border: 1px solid rgba(148,163,184,.12); border-radius: 18px; padding: 20px; }
-
-    section { padding: 22px 24px; }
-    .grid { display:grid; grid-template-columns: repeat(12, 1fr); gap: 18px; }
-    .col-12 { grid-column: span 12; }
-    .col-7 { grid-column: span 7; } .col-5 { grid-column: span 5; }
-    .col-6 { grid-column: span 6; }
-    @media (max-width: 900px){ .col-7, .col-5, .col-6 { grid-column: span 12; } }
-
-    h2 { font-size: 24px; margin: 0 0 12px; letter-spacing: .2px; }
+    h2 { font-size: 24px; margin: 0 0 12px; }
     .muted { color: var(--muted); }
-
-    .kpis { display:flex; gap:12px; flex-wrap:wrap; margin: 14px 0 0; }
-    .kpi { background: rgba(34,211,238,.08); border: 1px solid rgba(34,211,238,.24); color: #c5f6fa; padding: 8px 10px; border-radius: 10px; font-size: 12px; }
-
-    .tag { padding:6px 10px; border-radius:999px; background: rgba(148,163,184,.08); color: var(--muted); border:1px solid rgba(148,163,184,.15); font-size:12px; }
     .tags { display:flex; gap:8px; flex-wrap:wrap; }
-
-    .proj { display:flex; gap:14px; align-items:flex-start; }
-    .proj .dot { width:10px; height:10px; border-radius:50%; background: linear-gradient(135deg, var(--brand), var(--brand-2)); margin-top: 10px; flex: none; box-shadow: 0 0 0 3px rgba(34,211,238,.12) }
-    .proj h3 { margin: 0 0 6px; font-size: 18px; }
-    .proj p { margin: 0 0 6px; color: var(--muted); }
-
-    .timeline { border-left: 2px dashed rgba(148,163,184,.18); padding-left: 14px; }
-    .job { margin-bottom: 16px; }
-    .job h3 { margin: 0; font-size: 16px; }
-    .job .when { color: var(--muted); font-size: 13px; }
-
-    footer { padding: 40px 24px 60px; color: var(--muted); text-align:center; }
-    .split { display:flex; gap: 18px; }
-    .split > * { flex:1; }
-    @media (max-width: 900px){ .split { flex-direction: column; } }
+    .tag { padding:6px 10px; border-radius:999px; background: rgba(148,163,184,.08); color: var(--muted); border:1px solid rgba(148,163,184,.15); font-size:12px; }
   </style>
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    "name": "Avesh Shah",
-    "jobTitle": "Robotics & Autonomous Systems Engineer",
-    "url": "https://avesh-shah.com",
-    "email": "mailto:aveshshah@gmail.com",
-    "knowsAbout": [
-      "ROS2", "GNSS", "NTRIP", "Sensor Fusion", "Kalman Filter", "MPC",
-      "Docker", "CI/CD", "CAN bus", "Audio DSP", "u-blox", "TLS"
-    ]
-  }
-  </script>
 </head>
 <body>
   <header>
@@ -133,17 +76,6 @@
           <span class="kpi">Audio ML (TFLite)</span>
         </div>
       </div>
-      <div class="card">
-        <h2>Now</h2>
-        <p class="muted">Building a robust GNSS correction pipeline (PointPerfect) with TLS‑backed NTRIP over SPI/UART, and refining Vx/Vy EKF with wheel‑slip detection for low‑speed stability.</p>
-        <div class="tags" style="margin-top:10px;">
-          <span class="tag">ROS2 Humble</span>
-          <span class="tag">u‑blox F9P</span>
-          <span class="tag">SPI / UART</span>
-          <span class="tag">TLS</span>
-          <span class="tag">Docker</span>
-        </div>
-      </div>
     </section>
 
     <section id="projects" class="grid">
@@ -153,10 +85,24 @@
         <div class="proj">
           <div class="dot"></div>
           <div>
-            <h3>PointPerfect NTRIP Client (ROS2, SPI)</h3>
-            <p>Resilient TLS client that auto‑discovers mountpoints, sends live GGA, streams SPARTN/RTCM3 corrections to a u‑blox receiver over SPI. Minimal CPU, auto‑reconnect, and metrics heartbeat.</p>
+            <h3>PointPerfect NTRIP Client (ROS2)</h3>
+            <p>Resilient TLS client that auto‑discovers mountpoints, sends live GGA, streams SPARTN/RTCM3 corrections to a u‑blox receiver. Minimal CPU, auto‑reconnect, and metrics heartbeat. Also includes real‑time GNSS correction pipeline and slip‑aware EKF refinements for stability.</p>
             <div class="tags">
               <span class="tag">Python</span><span class="tag">TLS</span><span class="tag">SPARTN</span><span class="tag">UBX</span><span class="tag">RTCM3</span>
+              <span class="tag">ROS2 Humble</span><span class="tag">u‑blox F9P</span><span class="tag">Docker</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 card">
+        <div class="proj">
+          <div class="dot"></div>
+          <div>
+            <h3>Engine Control & Optimization</h3>
+            <p>Supported engine start and idle control profiling using full feedback LQR with fast‑path actuation to minimize delays and ensure closed loop torque. Developed tactical features including cost‑based optimization (predictive control) enhancements and physics‑based equations deployment.</p>
+            <div class="tags">
+              <span class="tag">Controls</span><span class="tag">Optimization</span><span class="tag">Predictive Control</span>
             </div>
           </div>
         </div>
@@ -217,26 +163,14 @@
 
     <section id="experience" class="grid">
       <div class="col-12"><h2>Experience</h2></div>
-      <div class="col-7">
-        <div class="card timeline">
-          <div class="job">
-            <h3>Magna — Central Gateway Module (Linux)</h3>
-            <div class="when">2024 — Present</div>
-            <ul>
-              <li>Integrated GPS, modems, teleoperations, and cameras via Docker images on NXP chips (OTA flashing).</li>
-              <li>Built CI/CD with Git, DockerHub, and AWS; automated deploys of ROS2 nodes for connectivity and audio.</li>
-              <li>USB↔I2C bridging for codec configuration (TLV320AIC3104) and GNSS receiver management.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
       <div class="col-5">
         <div class="card">
           <h3>Education & Highlights</h3>
           <ul>
             <li>Controls & Mechatronics background; deep MATLAB/Simulink experience.</li>
-            <li>u‑blox F9P (base/rover) with PointPerfect SPARTN corrections.</li>
-            <li>Strong in TLS client engineering and low‑level Linux audio/USB.</li>
+            <li>Certified in Machine Learning with practical applications.</li>
+            <li>3 years of professional Python development experience.</li>
+            <li>Specialized in torque path controls including cost optimization, shift energy management, creep, launch control, e‑coasting, and brake blending.</li>
           </ul>
         </div>
       </div>
@@ -264,7 +198,7 @@
           <h3>Platforms & I/O</h3>
           <div class="tags">
             <span class="tag">NXP S32G</span><span class="tag">Raspberry Pi</span>
-            <span class="tag">ALSA</span><span class="tag">SocketCAN</span><span class="tag">I²C/SPI/UART</span>
+            <span class="tag">ALSA</span><span class="tag">SocketCAN</span><span class="tag">I²C/UART</span>
           </div>
         </div>
       </div>
@@ -275,7 +209,7 @@
       <div class="col-12 card">
         <p>Want the full details? Download a concise résumé PDF.</p>
         <p><a class="btn" href="assets/Avesh_Shah_Resume.pdf" download>Download PDF</a></p>
-        <p class="muted" style="margin-top:6px;">(Place your résumé at <code>/assets/Avesh_Shah_Resume.pdf</code>.)</p>
+        
       </div>
     </section>
 
@@ -283,7 +217,7 @@
       <div class="col-12"><h2>Contact</h2></div>
       <div class="col-12 card">
         <p>Email: <a href="mailto:avesh.shah@magna.com">avesh.shah@magna.com</a></p>
-        <p>LinkedIn/GitHub links can go here when ready.</p>
+        <p>LinkedIn: <a href="https://www.linkedin.com/in/avesh-shah-b07b1318/" target="_blank">linkedin.com/in/avesh-shah-b07b1318</a></p>
       </div>
     </section>
   </main>
