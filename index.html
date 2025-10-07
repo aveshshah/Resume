@@ -17,6 +17,7 @@
       --text: #e5e7eb;
       --brand: #22d3ee;
       --brand-2: #38bdf8;
+      --ring: rgba(34, 211, 238, .4);
     }
     * { box-sizing: border-box; }
     body {
@@ -68,10 +69,18 @@
 
     <section id="projects">
       <h2>Highlighted Projects</h2>
+
       <div class="card"><h3>Vx/Vy EKF with Slip‑Aware Fusion</h3><p>Nine‑state EKF fusing wheel speeds, IMU yaw‑rate/accel, and GPS velocities. Dynamic noise scaling under slip, low‑speed yaw freeze, delayed measurement handling via buffer replay, and bias estimation.</p></div>
-      <div class="card"><h3>Lateral & Longitudinal Control</h3><p>Rollover index and lateral‑accel‑limited steering control. Longitudinal accel/decel & regen blending, and waypoint‑based MPC tracking.</p></div>
-      <div class="card"><h3>PointPerfect NTRIP Client (ROS2)</h3><p>TLS client streaming SPARTN corrections to u‑blox receivers; integrated with ROS2 and Docker for real‑time base‑rover positioning.</p></div>
-      <div class="card"><h3>Emergency Vehicle Detection (Audio ML)</h3><p>Binary siren classifier using YAMNet embeddings + TFLite head. Publishes detection status and amplitude in ROS2 audio node.</p></div>
+
+      <div class="card"><h3>Lateral & Longitudinal Control</h3><p>Lateral control to manage rollover risk using a rollover index and lateral‑accel limits; steering impulse shaping. Longitudinal control for accel/decel, regeneration blending, power/ range estimation, and calibrated steering map tracking along waypoints.</p></div>
+
+      <div class="card"><h3>PointPerfect NTRIP Client (ROS2)</h3><p>TLS client that discovers mountpoints, sends live GGA, and streams SPARTN/RTCM3 corrections to u‑blox receivers. Auto‑reconnect and metrics heartbeat; integrated with ROS2/Docker for cm‑level positioning.</p></div>
+
+      <div class="card"><h3>Emergency Vehicle Detection (Audio ML)</h3><p>Binary siren detector via YAMNet embeddings with a custom TFLite head. Real‑time ROS2 node publishes detection status and amplitude, with advert/alert duck/restore logic.</p></div>
+
+      <div class="card"><h3>Mass & Grade Estimation</h3><p>Vehicle mass and road grade estimation using Recursive Least Squares with torque, road‑load, and acceleration signals; tuned for &lt;10% error on test routes.</p></div>
+
+      <div class="card"><h3>CAN Telemetry + Web Dashboard</h3><p>SocketCAN receivers to ROS2 topics with a lightweight dashboard for GPS fix, wheel speeds, IMU, and state. Dockerized with CI/CD for edge deployment.</p></div>
     </section>
 
     <section id="experience">
@@ -79,22 +88,23 @@
       <div class="card">
         <h3>Magna International — Sr. Software Engineer (Apr 2024 – Present)</h3>
         <ul>
-          <li>Developed EKF-based estimation for Vx/Vy and pose from IMU, GPS, and wheel speeds.</li>
-          <li>Designed lateral/longitudinal control algorithms with rollover limits and regen blending.</li>
-          <li>Integrated NTRIP GNSS corrections in ROS2 and developed siren ML detection.</li>
+          <li>Built EKF‑based estimation for Vx/Vy, heading, and pose from IMU, GPS, and wheel speeds; added IMU line‑cal via I²C and roll/pitch (Kalman & Madgwick).</li>
+          <li>Designed lateral control with rollover index / lateral‑g limits and steering impulse; longitudinal accel/decel & regen blending; range estimation.</li>
+          <li>Integrated moving‑base GNSS corrections via NTRIP into ROS2/Docker; built audio pipeline (alerts/ads) and ML siren detection.</li>
+          <li>Mass/grade RLS estimation with ~10% error margin on routes.</li>
         </ul>
       </div>
-      <div class="card"><h3>Dana Incorporated — Technical Lead (Jan 2023 – Apr 2024)</h3><p>Led AUTOSAR ASPICE-compliant BEV control SW; torque management and fault handling domains.</p></div>
-      <div class="card"><h3>FEV North America — Sr. Controls / Technical Lead (Oct 2018 – Jan 2023)</h3><p>Worked on torque path controls, LQR idle control, and regen brake blending.</p></div>
+      <div class="card"><h3>Dana Incorporated — Technical Lead (Jan 2023 – Apr 2024)</h3><p>Led AUTOSAR ASPICE‑compliant ASW for BEV transmissions; managed 6 engineers, technical reviews, OEM workshops.</p></div>
+      <div class="card"><h3>FEV North America — Sr. Controls / Technical Lead (Oct 2018 – Jan 2023)</h3><p>Torque‑path controls: creep, dual‑path shift energy, coast‑based split, launch control, predictive control enhancements. LQR‑based engine start/idle control profiling; regen‑brake interfaces for smooth shift transitions.</p></div>
     </section>
 
     <section id="skills">
       <h2>Skills</h2>
       <div class="card">
-        <p><strong>Controls:</strong> Kalman Filters, LQR/LQI, MPC, Optimization</p>
-        <p><strong>Software:</strong> MATLAB/Simulink, Python, ROS2, Docker, C++</p>
-        <p><strong>Hardware:</strong> NXP S32G, Raspberry Pi, CAN, I²C/UART</p>
-        <p><strong>Tools:</strong> Git, CI/CD, AUTOSAR, Agile, Polarion</p>
+        <p><strong>Controls:</strong> Kalman Filters, Particle Filter, LQR/LQI, MPC, Optimization, Feedback Control</p>
+        <p><strong>Software:</strong> MATLAB/Simulink, Python, ROS2, Docker, C++, JSON/YAML</p>
+        <p><strong>Hardware:</strong> NXP S32G, Raspberry Pi, DSpace, ETAS/INCA, MotoHawk, CAN, I²C/UART</p>
+        <p><strong>Tools:</strong> Git, Azure, CI/CD, AUTOSAR, Agile, Polarion, Doors</p>
       </div>
     </section>
 
