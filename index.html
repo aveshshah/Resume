@@ -17,60 +17,27 @@
       --text: #e5e7eb;
       --brand: #22d3ee;
       --brand-2: #38bdf8;
-      --ring: rgba(34, 211, 238, .4);
-      --ok: #34d399;
-      --warn: #fbbf24;
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
     body {
-      margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-      background: radial-gradient(1200px 800px at 80% -10%, rgba(34,211,238,.06), transparent 60%),
-                  radial-gradient(900px 700px at -10% -20%, rgba(56,189,248,.06), transparent 60%),
-                  var(--bg);
-      color: var(--text); line-height: 1.6;
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
     }
-    a { color: var(--brand-2); text-decoration: none; }
-    a:hover { text-decoration: underline; }
     .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
-    header { position: sticky; top: 0; backdrop-filter: blur(10px); background: linear-gradient(to bottom, rgba(11,16,32,.9), rgba(11,16,32,.6)); border-bottom: 1px solid rgba(148,163,184,.15); z-index: 20; }
-    nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 24px; }
-    .logo { font-weight: 800; letter-spacing: .3px; }
-    .navlinks a { margin-left: 18px; font-weight: 600; color: var(--text); opacity: .85; }
-    .navlinks a:hover { opacity: 1; }
-    .card { background: linear-gradient(180deg, rgba(16,24,39,.9), rgba(16,24,39,.8)); border: 1px solid rgba(148,163,184,.12); border-radius: 18px; padding: 20px; }
-    h1 { font-size: clamp(32px, 4vw, 54px); line-height: 1.1; margin: 0 0 18px; letter-spacing: -.4px; }
-    h2 { font-size: 24px; margin: 0 0 12px; }
-    h3 { margin: 0 0 8px; }
-    .muted { color: var(--muted); }
-    .tags { display:flex; gap:8px; flex-wrap:wrap; }
-    .tag { padding:6px 10px; border-radius:999px; background: rgba(148,163,184,.08); color: var(--muted); border:1px solid rgba(148,163,184,.15); font-size:12px; }
-    /* grid */
-    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; margin-top: 32px; }
-    .col-12 { grid-column: span 12; }
-    .col-8 { grid-column: span 8; }
-    .col-6 { grid-column: span 6; }
-    .col-5 { grid-column: span 5; }
-    .col-4 { grid-column: span 4; }
-    .split { display:grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-    @media (max-width: 900px) {
-      .grid { grid-template-columns: repeat(6, 1fr); }
-      .col-8, .col-6, .col-5, .col-4 { grid-column: span 6; }
-      .split { grid-template-columns: 1fr; }
-    }
-    .hero .chip { display:inline-block; padding:6px 10px; border-radius:999px; background: rgba(34,211,238,.08); border:1px solid rgba(34,211,238,.25); color: var(--brand-2); font-weight:600; font-size:12px; letter-spacing:.3px; }
-    .subtitle { color: var(--muted); margin: 8px 0 16px; max-width: 65ch; }
-    .cta { display:flex; gap:12px; margin: 14px 0 10px; }
-    .btn { display:inline-block; padding:10px 14px; border-radius:12px; border:1px solid rgba(148,163,184,.2); background: rgba(148,163,184,.06); color: var(--text); font-weight:600; }
+    header { position: sticky; top: 0; background: #0b1020e6; border-bottom: 1px solid #1e293b; }
+    nav { display: flex; align-items: center; justify-content: space-between; }
+    .navlinks a { margin-left: 18px; color: var(--text); text-decoration: none; font-weight: 600; }
+    .navlinks a:hover { color: var(--brand-2); }
+    .card { background: #0f172a; border-radius: 16px; padding: 20px; border: 1px solid #1e293b; }
+    h1 { font-size: 48px; margin-bottom: 10px; }
+    h2 { font-size: 28px; margin-top: 40px; }
+    h3 { margin-top: 20px; }
+    .hero .chip { background: rgba(34,211,238,.1); color: var(--brand-2); padding: 6px 10px; border-radius: 999px; font-size: 12px; }
+    .btn { display: inline-block; padding: 10px 14px; border-radius: 12px; background: rgba(56,189,248,.1); color: var(--text); border: 1px solid rgba(56,189,248,.3); text-decoration: none; margin-right: 10px; }
     .btn.primary { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #00111a; border: none; }
-    .kpis { display:flex; flex-wrap:wrap; gap:12px; margin-top: 10px; color: var(--muted); font-size: 14px; }
-    .proj { display:flex; gap:12px; align-items:flex-start; }
-    .dot { width:10px; height:10px; border-radius:999px; background: var(--brand-2); flex: 0 0 auto; margin-top: 10px; box-shadow: 0 0 0 6px rgba(56,189,248,.1); }
-    ul { margin: 10px 0 0 18px; }
-    li { margin: 6px 0; }
-    footer { margin: 40px 0 20px; color: var(--muted); }
-    .contact-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 900px){ .contact-grid{ grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
@@ -91,204 +58,59 @@
       <div>
         <span class="chip">Controls • Robotics • Embedded</span>
         <h1>Controls-first engineer applying robotics to real vehicles.</h1>
-        <p class="subtitle">I design and ship control algorithms and autonomy plumbing — EKF/LQR/MPC, sensor fusion across IMU/GNSS/wheel-speeds, and ROS2 deployments on NXP S32G & Raspberry Pi. Strong MATLAB/Simulink + Python, with CAN, I²C and Docker in the loop.</p>
+        <p>I design and ship control algorithms and autonomy plumbing — EKF/LQR/MPC, sensor fusion across IMU/GNSS/wheel-speeds, and ROS2 deployments on NXP S32G & Raspberry Pi. Strong MATLAB/Simulink + Python, with CAN, I²C and Docker in the loop.</p>
         <div class="cta">
           <a class="btn primary" href="#projects">Explore projects</a>
-          <a class="btn" href="assets/Avesh_Resume_Updated.pdf" download>Download résumé</a>
-          <a class="btn" href="mailto:aveshshah@gmail.com">Email me</a>
-        </div>
-        <div class="kpis">
-          <span class="kpi">EKF/MPC/LQR</span>
-          <span class="kpi">ROS2: 15+ real-time nodes</span>
-          <span class="kpi">GNSS (u‑blox F9P + NTRIP)</span>
+          <a class="btn" href="./assets/Avesh_Resume_Updated.pdf" download>Download résumé</a>
         </div>
       </div>
     </section>
 
-    <section id="projects" class="grid">
-      <div class="col-12"><h2>Highlighted projects</h2></div>
+    <section id="projects">
+      <h2>Highlighted Projects</h2>
+      <div class="card"><h3>Vx/Vy EKF with Slip‑Aware Fusion</h3><p>Nine‑state EKF fusing wheel speeds, IMU yaw‑rate/accel, and GPS velocities. Dynamic noise scaling under slip, low‑speed yaw freeze, delayed measurement handling via buffer replay, and bias estimation.</p></div>
+      <div class="card"><h3>Lateral & Longitudinal Control</h3><p>Rollover index and lateral‑accel‑limited steering control. Longitudinal accel/decel & regen blending, and waypoint‑based MPC tracking.</p></div>
+      <div class="card"><h3>PointPerfect NTRIP Client (ROS2)</h3><p>TLS client streaming SPARTN corrections to u‑blox receivers; integrated with ROS2 and Docker for real‑time base‑rover positioning.</p></div>
+      <div class="card"><h3>Emergency Vehicle Detection (Audio ML)</h3><p>Binary siren classifier using YAMNet embeddings + TFLite head. Publishes detection status and amplitude in ROS2 audio node.</p></div>
+    </section>
 
-      <div class="col-6 card">
-        <div class="proj">
-          <div class="dot"></div>
-          <div>
-            <h3>Vx/Vy EKF with Slip‑Aware Fusion</h3>
-            <p>Nine‑state EKF fusing wheel speeds, IMU yaw‑rate/accel, and GPS velocities. Dynamic noise scaling under slip, low‑speed yaw freeze, delayed measurement handling via buffer replay, and bias estimation.</p>
-            <div class="tags">
-              <span class="tag">MATLAB/Simulink</span><span class="tag">EKF</span><span class="tag">Sensor Fusion</span>
-            </div>
-          </div>
-        </div>
+    <section id="experience">
+      <h2>Experience</h2>
+      <div class="card">
+        <h3>Magna International — Sr. Software Engineer (Apr 2024 – Present)</h3>
+        <ul>
+          <li>Developed EKF-based estimation for Vx/Vy and pose from IMU, GPS, and wheel speeds.</li>
+          <li>Designed lateral/longitudinal control algorithms with rollover limits and regen blending.</li>
+          <li>Integrated NTRIP GNSS corrections in ROS2 and developed siren ML detection.</li>
+        </ul>
       </div>
+      <div class="card"><h3>Dana Incorporated — Technical Lead (Jan 2023 – Apr 2024)</h3><p>Led AUTOSAR ASPICE-compliant BEV control SW; torque management and fault handling domains.</p></div>
+      <div class="card"><h3>FEV North America — Sr. Controls / Technical Lead (Oct 2018 – Jan 2023)</h3><p>Worked on torque path controls, LQR idle control, and regen brake blending.</p></div>
+    </section>
 
-      <div class="col-6 card">
-        <div class="proj">
-          <div class="dot"></div>
-          <div>
-            <h3>Lateral & Longitudinal Control</h3>
-            <p>Lateral control to manage rollover risk using a rollover index and lateral‑accel limits; steering impulse shaping. Longitudinal control for accel/decel, regeneration blending, power/ range estimation, and calibrated steering map tracking along waypoints.</p>
-            <div class="tags">
-              <span class="tag">LQR/LQI</span><span class="tag">MPC</span><span class="tag">Optimization</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-6 card">
-        <div class="proj">
-          <div class="dot"></div>
-          <div>
-            <h3>PointPerfect NTRIP Client (ROS2)</h3>
-            <p>TLS client that discovers mountpoints, sends live GGA, and streams SPARTN/RTCM3 corrections to u‑blox receivers. Auto‑reconnect and metrics heartbeat; integrated with ROS2/Docker for cm‑level positioning.</p>
-            <div class="tags">
-              <span class="tag">Python</span><span class="tag">TLS</span><span class="tag">SPARTN</span><span class="tag">RTCM3</span><span class="tag">ROS2</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-6 card">
-        <div class="proj">
-          <div class="dot"></div>
-          <div>
-            <h3>Emergency Vehicle Detection (Audio ML)</h3>
-            <p>Binary siren detector via YAMNet embeddings with a custom TFLite head. Real‑time ROS2 node publishes detection status and amplitude, with advert/alert duck/restore logic.</p>
-            <div class="tags">
-              <span class="tag">TFLite</span><span class="tag">Audio DSP</span><span class="tag">ROS2</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-6 card">
-        <div class="proj">
-          <div class="dot"></div>
-          <div>
-            <h3>Mass & Grade Estimation</h3>
-            <p>Vehicle mass and road grade estimation using Recursive Least Squares with torque, road‑load, and acceleration signals; tuned for &lt;10% error on test routes.</p>
-            <div class="tags">
-              <span class="tag">RLS</span><span class="tag">System ID</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-6 card">
-        <div class="proj">
-          <div class="dot"></div>
-          <div>
-            <h3>CAN Telemetry + Web Dashboard</h3>
-            <p>SocketCAN receivers to ROS2 topics with a lightweight dashboard for GPS fix, wheel speeds, IMU, and state. Dockerized with CI/CD for edge deployment.</p>
-            <div class="tags">
-              <span class="tag">SocketCAN</span><span class="tag">Docker</span><span class="tag">CI/CD</span>
-            </div>
-          </div>
-        </div>
+    <section id="skills">
+      <h2>Skills</h2>
+      <div class="card">
+        <p><strong>Controls:</strong> Kalman Filters, LQR/LQI, MPC, Optimization</p>
+        <p><strong>Software:</strong> MATLAB/Simulink, Python, ROS2, Docker, C++</p>
+        <p><strong>Hardware:</strong> NXP S32G, Raspberry Pi, CAN, I²C/UART</p>
+        <p><strong>Tools:</strong> Git, CI/CD, AUTOSAR, Agile, Polarion</p>
       </div>
     </section>
 
-    <section id="experience" class="grid">
-      <div class="col-12"><h2>Experience</h2></div>
-
-      <div class="col-8 card">
-        <h3>Magna International — Sr. Software Engineer <span class="muted">(Apr 2024 – Present, Troy MI)</span></h3>
-        <ul>
-          <li>Built EKF‑based estimation for Vx/Vy, heading, and pose from IMU, GPS, and wheel speeds; added IMU line‑cal via I²C and roll/pitch (Kalman & Madgwick).</li>
-          <li>Designed lateral control with rollover index / lateral‑g limits and steering impulse; longitudinal accel/decel & regen blending; range estimation.</li>
-          <li>Integrated moving‑base GNSS corrections via NTRIP into ROS2/Docker; built audio pipeline (alerts/ads) and ML siren detection.</li>
-          <li>Mass/grade RLS estimation with ~10% error margin on routes.</li>
-        </ul>
-      </div>
-
-      <div class="col-4 card">
-        <h3>Education</h3>
-        <ul>
-          <li>M.S., Automotive Engineering — Clemson University (GATE Fellow), GPA 3.57</li>
-          <li>B.Tech, Mechanical Engineering — NIT Jaipur, GPA 8.37</li>
-        </ul>
-      </div>
-
-      <div class="col-12 card">
-        <h3>Dana Incorporated — Technical Lead <span class="muted">(Jan 2023 – Apr 2024)</span></h3>
-        <ul>
-          <li>Led AUTOSAR ASPICE‑compliant ASW for BEV transmissions; managed 6 engineers, technical reviews, OEM workshops.</li>
-          <li>Torque management, thermal/lube features, and fault handling domains.</li>
-        </ul>
-      </div>
-
-      <div class="col-12 card">
-        <h3>FEV North America — Sr. Controls / Technical Lead <span class="muted">(Oct 2018 – Jan 2023)</span></h3>
-        <ul>
-          <li>Torque‑path controls: creep, dual‑path shift energy, coast‑based split, launch control, predictive control enhancements.</li>
-          <li>LQR‑based engine start/idle control profiling; regen‑brake interfaces for smooth shift transitions.</li>
-        </ul>
-      </div>
-
-      <div class="col-12 card">
-        <h3>Hybrid Design Services — Controls Engineer <span class="muted">(Dec 2016 – Oct 2018)</span></h3>
-        <ul>
-          <li>Hybrid/EV strategies in MATLAB/Simulink & Stateflow; prototype BMS with EKF SOC, power limits, and contactor weld checks; CAN network and MotoHawk integration.</li>
-        </ul>
-      </div>
-
-      <div class="col-12 card">
-        <h3>General Motors (Contract) — R&D Test Systems Engineer <span class="muted">(Aug 2014 – Dec 2016)</span></h3>
-        <ul>
-          <li>Simulink/LabVIEW controls for research engines; FPGA/DSpace test systems and CAN communication for prototype ECU validation.</li>
-        </ul>
+    <section id="contact">
+      <h2>Contact</h2>
+      <div class="card">
+        <p>Email: <a href="mailto:aveshshah@gmail.com">aveshshah@gmail.com</a></p>
+        <p>Phone: <a href="tel:+18649916480">(864) 991‑6480</a></p>
+        <p>Website: <a href="https://www.avesh-shah.com">www.avesh-shah.com</a></p>
       </div>
     </section>
 
-    <section id="skills" class="grid">
-      <div class="col-12"><h2>Skills</h2></div>
-      <div class="col-12 card split">
-        <div>
-          <h3>Controls</h3>
-          <div class="tags">
-            <span class="tag">Kalman Filters</span><span class="tag">Particle Filter</span><span class="tag">LQR/LQI</span><span class="tag">MPC</span><span class="tag">Optimization</span><span class="tag">Feedback Control</span>
-          </div>
-        </div>
-        <div>
-          <h3>Software</h3>
-          <div class="tags">
-            <span class="tag">MATLAB/Simulink/Stateflow</span><span class="tag">Python</span><span class="tag">C++</span><span class="tag">ROS2</span><span class="tag">Docker</span><span class="tag">JSON/YAML</span>
-          </div>
-        </div>
-        <div>
-          <h3>Hardware & I/O</h3>
-          <div class="tags">
-            <span class="tag">NXP S32G</span><span class="tag">Raspberry Pi</span><span class="tag">DSpace</span><span class="tag">ETAS/INCA</span><span class="tag">MotoHawk</span><span class="tag">CAN</span><span class="tag">I²C/UART</span>
-          </div>
-        </div>
-        <div>
-          <h3>Tools & Process</h3>
-          <div class="tags">
-            <span class="tag">Git/Azure</span><span class="tag">CI/CD</span><span class="tag">Polarion</span><span class="tag">Doors</span><span class="tag">Autosar</span><span class="tag">Agile</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="resume" class="grid">
-      <div class="col-12"><h2>Résumé</h2></div>
-      <div class="col-12 card">
-        <p>Download a concise résumé PDF.</p>
-        <p><a class="btn" href="assets/Avesh_Resume_Updated.pdf" download>Download PDF</a></p>
-      </div>
-    </section>
-
-    <section id="contact" class="grid">
-      <div class="col-12"><h2>Contact</h2></div>
-      <div class="col-12 card contact-grid">
-        <div>
-          <p><strong>Email:</strong> <a href="mailto:aveshshah@gmail.com">aveshshah@gmail.com</a></p>
-          <p><strong>Phone:</strong> <a href="tel:+18649916480">(864) 991‑6480</a></p>
-        </div>
-        <div>
-          <p><strong>Location:</strong> Rochester Hills, MI</p>
-          <p><strong>Website:</strong> <a href="https://www.avesh-shah.com" target="_blank" rel="noopener">www.avesh-shah.com</a></p>
-          <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/avesh-shah-b07b1318/" target="_blank" rel="noopener">linkedin.com/in/avesh-shah-b07b1318</a></p>
-        </div>
+    <section id="resume">
+      <h2>Résumé</h2>
+      <div class="card">
+        <p><a class="btn" href="./assets/Avesh_Resume_Updated.pdf" download>Download PDF</a></p>
       </div>
     </section>
   </main>
@@ -298,9 +120,6 @@
       <p>© <span id="y"></span> Avesh Shah. Built with plain HTML/CSS for fast static hosting.</p>
     </div>
   </footer>
-
-  <script>
-    document.getElementById('y').textContent = new Date().getFullYear();
-  </script>
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 </body>
 </html>
