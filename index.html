@@ -5,142 +5,1080 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Avesh Shah — Controls & Robotics Engineer</title>
   <meta name="description" content="Avesh Shah — Controls-focused engineer applying robotics methods: EKF/MPC, LQR/LQI, sensor fusion, ROS2, GNSS/NTRIP, audio ML, CAN, Docker." />
-  <meta name="theme-color" content="#0f172a" />
+  <meta name="theme-color" content="#040812" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #0b1020;
-      --card: #0f172a;
-      --muted: #94a3b8;
-      --text: #e5e7eb;
-      --brand: #22d3ee;
-      --brand-2: #38bdf8;
-      --ring: rgba(34, 211, 238, .4);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-    }
-    .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
-    header { position: sticky; top: 0; background: #0b1020e6; border-bottom: 1px solid #1e293b; }
-    nav { display: flex; align-items: center; justify-content: space-between; }
-    .navlinks a { margin-left: 18px; color: var(--text); text-decoration: none; font-weight: 600; }
-    .navlinks a:hover { color: var(--brand-2); }
-    .card { background: #0f172a; border-radius: 16px; padding: 20px; border: 1px solid #1e293b; }
-    h1 { font-size: 48px; margin-bottom: 10px; }
-    h2 { font-size: 28px; margin-top: 40px; }
-    h3 { margin-top: 20px; }
-    .hero .chip { background: rgba(34,211,238,.1); color: var(--brand-2); padding: 6px 10px; border-radius: 999px; font-size: 12px; }
-    .btn { display: inline-block; padding: 10px 14px; border-radius: 12px; background: rgba(56,189,248,.1); color: var(--text); border: 1px solid rgba(56,189,248,.3); text-decoration: none; margin-right: 10px; }
-    .btn.primary { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #00111a; border: none; }
-  </style>
-  
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-M09FN4M8HM"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-M09FN4M8HM');
   </script>
 
+  <style>
+    :root {
+      --bg: #040812;
+      --surface: #080f1e;
+      --surface2: #0c1628;
+      --border: rgba(99,179,237,0.12);
+      --border-bright: rgba(99,179,237,0.3);
+      --text: #dce8f5;
+      --muted: #6b8aa8;
+      --accent: #63b3ed;
+      --accent2: #4fd1c5;
+      --accent3: #f6c90e;
+      --glow: rgba(99,179,237,0.15);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE TEXTURE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    /* ── AMBIENT GLOW ORBS ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.18;
+    }
+    .orb-1 { width: 600px; height: 600px; background: #1a4a8a; top: -200px; left: -100px; }
+    .orb-2 { width: 500px; height: 500px; background: #0d6b6b; bottom: 10%; right: -150px; }
+    .orb-3 { width: 300px; height: 300px; background: #7c4dff; top: 40%; left: 30%; opacity: 0.08; }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1120px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+
+    /* ── NAV ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(4,8,18,0.8);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 32px;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+    .logo span { color: var(--accent); }
+
+    .navlinks { display: flex; gap: 8px; align-items: center; }
+    .navlinks a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      font-family: 'DM Mono', monospace;
+    }
+    .navlinks a:hover { color: var(--accent); background: rgba(99,179,237,0.08); }
+
+    .nav-cta {
+      background: var(--accent) !important;
+      color: #040812 !important;
+      font-weight: 600 !important;
+      border-radius: 8px !important;
+    }
+    .nav-cta:hover { opacity: 0.9; background: var(--accent) !important; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 100px 0 80px;
+    }
+
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards 0.1s;
+    }
+
+    .tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 4px;
+      background: rgba(99,179,237,0.08);
+      border: 1px solid var(--border-bright);
+      color: var(--accent);
+    }
+
+    .tag.teal { background: rgba(79,209,197,0.08); border-color: rgba(79,209,197,0.3); color: var(--accent2); }
+    .tag.yellow { background: rgba(246,201,14,0.08); border-color: rgba(246,201,14,0.3); color: var(--accent3); }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(42px, 7vw, 88px);
+      font-weight: 800;
+      line-height: 1.0;
+      letter-spacing: -3px;
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards 0.25s;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 640px;
+      line-height: 1.8;
+      margin-bottom: 40px;
+      font-weight: 300;
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards 0.4s;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards 0.55s;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #040812;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(99,179,237,0.35); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border-bright);
+    }
+    .btn-outline:hover { background: rgba(99,179,237,0.06); border-color: var(--accent); transform: translateY(-2px); }
+
+    /* ── STATS ROW ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin: 80px 0;
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards 0.7s;
+    }
+
+    .stat {
+      background: var(--surface);
+      padding: 32px 28px;
+      text-align: center;
+      transition: background 0.2s;
+    }
+    .stat:hover { background: var(--surface2); }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 40px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── SECTION HEADINGS ── */
+    .section { padding: 80px 0; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      color: var(--text);
+    }
+
+    /* ── PROJECT CARDS ── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      cursor: default;
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(99,179,237,0.08) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .project-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-bright);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .project-card:hover::before { opacity: 1; }
+
+    .project-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 18px;
+      background: rgba(99,179,237,0.1);
+      border: 1px solid var(--border);
+    }
+
+    .project-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .project-card p {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .project-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 16px;
+    }
+
+    .ptag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(79,209,197,0.08);
+      border: 1px solid rgba(79,209,197,0.2);
+      color: var(--accent2);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── TIMELINE ── */
+    .timeline { position: relative; }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 22px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards;
+    }
+
+    .timeline-dot {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 2px solid var(--border-bright);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .timeline-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      transition: border-color 0.2s;
+    }
+    .timeline-content:hover { border-color: var(--border-bright); }
+
+    .timeline-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .timeline-content h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    .timeline-company {
+      font-size: 13px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 4px;
+    }
+
+    .timeline-date {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      background: rgba(99,179,237,0.07);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .timeline-content ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 12px;
+    }
+    .timeline-content ul li {
+      font-size: 14px;
+      color: var(--muted);
+      padding: 5px 0 5px 20px;
+      position: relative;
+      line-height: 1.65;
+    }
+    .timeline-content ul li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--accent2);
+      font-size: 16px;
+      line-height: 1.4;
+    }
+
+    /* ── SKILLS ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .skill-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      transition: border-color 0.2s;
+    }
+    .skill-block:hover { border-color: var(--border-bright); }
+
+    .skill-block-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .skill-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      transition: all 0.2s;
+      font-family: 'DM Mono', monospace;
+    }
+    .chip:hover {
+      border-color: var(--border-bright);
+      background: rgba(99,179,237,0.07);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* ── CONTACT ── */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .contact-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+    }
+
+    .contact-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--text);
+      transition: color 0.2s;
+    }
+    .contact-item:last-child { border-bottom: none; }
+    .contact-item:hover { color: var(--accent); }
+
+    .contact-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(99,179,237,0.1);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .contact-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .contact-value { font-size: 14px; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 15px;
+      color: var(--muted);
+    }
+
+    .footer-copy {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border-bright), transparent);
+      margin: 0;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .anim-delay-1 { animation-delay: 0.1s; }
+    .anim-delay-2 { animation-delay: 0.2s; }
+    .anim-delay-3 { animation-delay: 0.3s; }
+    .anim-delay-4 { animation-delay: 0.4s; }
+    .anim-delay-5 { animation-delay: 0.5s; }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .projects-grid { grid-template-columns: 1fr 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .contact-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px; }
+      .navlinks a { padding: 5px 8px; font-size: 12px; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .skills-grid { grid-template-columns: 1fr; }
+      .hero { padding: 80px 0 60px; }
+      .hero h1 { letter-spacing: -2px; }
+    }
+  </style>
 </head>
 <body>
+
+  <!-- AMBIENT ORBS -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- NAV -->
   <header>
-    <nav class="container">
-      <div class="logo">Avesh Shah</div>
+    <nav>
+      <div class="logo">Avesh <span>Shah</span></div>
       <div class="navlinks">
         <a href="#projects">Projects</a>
         <a href="#experience">Experience</a>
         <a href="#skills">Skills</a>
         <a href="#contact">Contact</a>
+        <a class="nav-cta" href="./assets/Avesh_Resume_Updated.pdf" download>Résumé ↓</a>
       </div>
     </nav>
   </header>
 
-  <main class="container">
-    <section class="hero">
-      <div>
-        <span class="chip">Controls • Robotics • Embedded</span>
-        <h1>Controls-first engineer applying robotics to real vehicles.</h1>
-        <p>I design and ship control algorithms and autonomy plumbing — EKF/LQR/MPC, sensor fusion across IMU/GNSS/wheel-speeds, and ROS2 deployments on NXP S32G & Raspberry Pi. Strong MATLAB/Simulink + Python, with CAN, I²C and Docker in the loop.</p>
-        <div class="cta">
-          <a class="btn primary" href="#projects">Explore projects</a>
-          <a class="btn" href="./assets/Avesh_Resume_Updated.pdf" download>Download résumé</a>
+  <!-- HERO -->
+  <main>
+    <section class="hero container">
+      <div class="hero-eyebrow">
+        <span class="tag">Controls Engineer</span>
+        <span class="tag teal">Robotics</span>
+        <span class="tag yellow">Product Owner @ Magna</span>
+      </div>
+
+      <h1>Building the<br><em>intelligence</em><br>inside vehicles.</h1>
+
+      <p class="hero-desc">
+        I design and ship control algorithms and autonomy systems — EKF/LQR/MPC, multi-sensor fusion across IMU/GNSS/wheel-speeds, and ROS2 deployments from NXP S32G to Raspberry Pi. 10+ years turning physics into production code.
+      </p>
+
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#projects">View Projects →</a>
+        <a class="btn btn-outline" href="./assets/Avesh_Resume_Updated.pdf" download>Download Résumé</a>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <div class="container">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-num">10+</div>
+          <div class="stat-label">Years of Experience</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">6</div>
+          <div class="stat-label">Programs Led</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">cm</div>
+          <div class="stat-label">GNSS Accuracy Achieved</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">&lt;10%</div>
+          <div class="stat-label">Mass/Grade RLS Error</div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <section id="projects">
-      <h2>Highlighted Projects</h2>
+    <div class="divider"></div>
 
-      <div class="card"><h3>Vx/Vy EKF with Slip‑Aware Fusion</h3><p>Nine‑state EKF fusing wheel speeds, IMU yaw‑rate/accel, and GPS velocities. Dynamic noise scaling under slip, low‑speed yaw freeze, delayed measurement handling via buffer replay, and bias estimation.</p></div>
-
-      <div class="card"><h3>Lateral & Longitudinal Control</h3><p>Lateral control to manage rollover risk using a rollover index and lateral‑accel limits; steering impulse shaping. Longitudinal control for accel/decel, regeneration blending, power/ range estimation, and calibrated steering map tracking along waypoints.</p></div>
-
-      <div class="card"><h3>PointPerfect NTRIP Client (ROS2)</h3><p>TLS client that discovers mountpoints, sends live GGA, and streams SPARTN/RTCM3 corrections to u‑blox receivers. Auto‑reconnect and metrics heartbeat; integrated with ROS2/Docker for cm‑level positioning.</p></div>
-
-      <div class="card"><h3>Emergency Vehicle Detection (Audio ML)</h3><p>Binary siren detector via YAMNet embeddings with a custom TFLite head. Real‑time ROS2 node publishes detection status and amplitude, with advert/alert duck/restore logic.</p></div>
-
-      <div class="card"><h3>Mass & Grade Estimation</h3><p>Vehicle mass and road grade estimation using Recursive Least Squares with torque, road‑load, and acceleration signals; tuned for &lt;10% error on test routes.</p></div>
-
-      <div class="card"><h3>CAN Telemetry + Web Dashboard</h3><p>SocketCAN receivers to ROS2 topics with a lightweight dashboard for GPS fix, wheel speeds, IMU, and state. Dockerized with CI/CD for edge deployment.</p></div>
-    </section>
-
-    <section id="experience">
-      <h2>Experience</h2>
-      <div class="card">
-        <h3>Magna International — Sr. Software Engineer (Apr 2024 – Present)</h3>
-        <ul>
-          <li>Built EKF‑based estimation for Vx/Vy, heading, and pose from IMU, GPS, and wheel speeds; added IMU line‑cal via I²C and roll/pitch (Kalman & Madgwick).</li>
-          <li>Designed lateral control with rollover index / lateral‑g limits and steering impulse; longitudinal accel/decel & regen blending; range estimation.</li>
-          <li>Integrated moving‑base GNSS corrections via NTRIP into ROS2/Docker; built audio pipeline (alerts/ads) and ML siren detection.</li>
-          <li>Mass/grade RLS estimation with ~10% error margin on routes.</li>
-        </ul>
+    <!-- PROJECTS -->
+    <section class="section container" id="projects">
+      <div class="section-header">
+        <span class="section-label">// 01 · featured work</span>
+        <div class="section-line"></div>
       </div>
-      <div class="card"><h3>Dana Incorporated — Technical Lead (Jan 2023 – Apr 2024)</h3><p>Led AUTOSAR ASPICE‑compliant ASW for BEV transmissions; managed 6 engineers, technical reviews, OEM workshops.</p></div>
-      <div class="card"><h3>FEV North America — Sr. Controls / Technical Lead (Oct 2018 – Jan 2023)</h3><p>Torque‑path controls: creep, dual‑path shift energy, coast‑based split, launch control, predictive control enhancements. LQR‑based engine start/idle control profiling; regen‑brake interfaces for smooth shift transitions.</p></div>
-    </section>
+      <h2 style="margin-bottom: 40px; letter-spacing:-1.5px;">Highlighted Projects</h2>
 
-    <section id="skills">
-      <h2>Skills</h2>
-      <div class="card">
-        <p><strong>Controls:</strong> Kalman Filters, Particle Filter, LQR/LQI, MPC, Optimization, Feedback Control</p>
-        <p><strong>Software:</strong> MATLAB/Simulink, Python, ROS2, Docker, C++, JSON/YAML</p>
-        <p><strong>Hardware:</strong> NXP S32G, Raspberry Pi, DSpace, ETAS/INCA, MotoHawk, CAN, I²C/UART</p>
-        <p><strong>Tools:</strong> Git, Azure, CI/CD, AUTOSAR, Agile, Polarion, Doors</p>
+      <div class="projects-grid">
+
+        <div class="project-card reveal" onmousemove="this.style.setProperty('--mx', event.offsetX/this.offsetWidth*100+'%'); this.style.setProperty('--my', event.offsetY/this.offsetHeight*100+'%')">
+          <div class="project-icon">🧮</div>
+          <h3>Vx/Vy EKF with Slip‑Aware Fusion</h3>
+          <p>Nine-state EKF fusing wheel speeds, IMU yaw-rate/accel, and GPS velocities. Dynamic noise scaling under slip, low-speed yaw freeze, delayed measurement handling via buffer replay, and bias estimation.</p>
+          <div class="project-tags">
+            <span class="ptag">Kalman Filter</span>
+            <span class="ptag">Sensor Fusion</span>
+            <span class="ptag">IMU</span>
+            <span class="ptag">GPS</span>
+          </div>
+        </div>
+
+        <div class="project-card reveal anim-delay-1" onmousemove="this.style.setProperty('--mx', event.offsetX/this.offsetWidth*100+'%'); this.style.setProperty('--my', event.offsetY/this.offsetHeight*100+'%')">
+          <div class="project-icon">🚗</div>
+          <h3>MPC Vehicle Trajectory & Roll Avoidance</h3>
+          <p>Model Predictive Control-based trajectory tracking and roll avoidance strategy using differential braking and limited steering change — real-time safety at the edge of vehicle dynamics.</p>
+          <div class="project-tags">
+            <span class="ptag">MPC</span>
+            <span class="ptag">Trajectory</span>
+            <span class="ptag">ADAS</span>
+            <span class="ptag">Safety</span>
+          </div>
+        </div>
+
+        <div class="project-card reveal anim-delay-2" onmousemove="this.style.setProperty('--mx', event.offsetX/this.offsetWidth*100+'%'); this.style.setProperty('--my', event.offsetY/this.offsetHeight*100+'%')">
+          <div class="project-icon">🛰️</div>
+          <h3>PointPerfect NTRIP Client (ROS2)</h3>
+          <p>TLS client that discovers mountpoints, sends live GGA, and streams SPARTN/RTCM3 corrections to u-blox receivers. Auto-reconnect and metrics heartbeat; integrated with ROS2/Docker for cm-level positioning.</p>
+          <div class="project-tags">
+            <span class="ptag">GNSS</span>
+            <span class="ptag">ROS2</span>
+            <span class="ptag">Docker</span>
+            <span class="ptag">NTRIP</span>
+          </div>
+        </div>
+
+        <div class="project-card reveal anim-delay-1" onmousemove="this.style.setProperty('--mx', event.offsetX/this.offsetWidth*100+'%'); this.style.setProperty('--my', event.offsetY/this.offsetHeight*100+'%')">
+          <div class="project-icon">🚨</div>
+          <h3>Emergency Vehicle Detection (Audio ML)</h3>
+          <p>Binary siren detector via YAMNet embeddings with a custom TFLite head. Real-time ROS2 node publishes detection status and amplitude, with alert duck/restore logic for passenger audio.</p>
+          <div class="project-tags">
+            <span class="ptag">YAMNet</span>
+            <span class="ptag">TFLite</span>
+            <span class="ptag">ROS2</span>
+            <span class="ptag">ML</span>
+          </div>
+        </div>
+
+        <div class="project-card reveal anim-delay-2" onmousemove="this.style.setProperty('--mx', event.offsetX/this.offsetWidth*100+'%'); this.style.setProperty('--my', event.offsetY/this.offsetHeight*100+'%')">
+          <div class="project-icon">⚖️</div>
+          <h3>Mass & Grade Estimation via RLS</h3>
+          <p>Vehicle mass and road grade estimation using Recursive Least Squares with torque, road-load, and acceleration signals. Tuned for &lt;10% error on real test routes.</p>
+          <div class="project-tags">
+            <span class="ptag">RLS</span>
+            <span class="ptag">Vehicle Dynamics</span>
+            <span class="ptag">MATLAB</span>
+          </div>
+        </div>
+
+        <div class="project-card reveal anim-delay-3" onmousemove="this.style.setProperty('--mx', event.offsetX/this.offsetWidth*100+'%'); this.style.setProperty('--my', event.offsetY/this.offsetHeight*100+'%')">
+          <div class="project-icon">📡</div>
+          <h3>CAN Telemetry + Web Dashboard</h3>
+          <p>SocketCAN receivers piped to ROS2 topics with a lightweight live dashboard for GPS fix, wheel speeds, IMU, and vehicle state. Dockerized with CI/CD for edge deployment.</p>
+          <div class="project-tags">
+            <span class="ptag">CAN</span>
+            <span class="ptag">ROS2</span>
+            <span class="ptag">Docker</span>
+            <span class="ptag">CI/CD</span>
+          </div>
+        </div>
+
       </div>
     </section>
 
-    <section id="contact">
-      <h2>Contact</h2>
-      <div class="card">
-        <p>Email: <a href="mailto:aveshshah@gmail.com">aveshshah@gmail.com</a></p>
-        <p>Phone: <a href="tel:+18649916480">(864) 991‑6480</a></p>
-        <p>Website: <a href="https://www.avesh-shah.com">www.avesh-shah.com</a></p>
+    <div class="divider"></div>
+
+    <!-- EXPERIENCE -->
+    <section class="section container" id="experience">
+      <div class="section-header">
+        <span class="section-label">// 02 · career</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 style="margin-bottom: 48px; letter-spacing:-1.5px;">Experience</h2>
+
+      <div class="timeline">
+
+        <div class="timeline-item reveal">
+          <div class="timeline-dot">🔩</div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <div>
+                <div class="timeline-company">Magna International · Troy, MI</div>
+                <h3>Product Owner</h3>
+              </div>
+              <span class="timeline-date">Sep 2025 – Present</span>
+            </div>
+            <ul>
+              <li>Overseeing MPC-based vehicle trajectory tracking and roll avoidance strategy using differential braking and limited steering change.</li>
+              <li>Supporting project leads with task tracking, test planning, and risk assessment inputs.</li>
+              <li>Collaborating with ADAS and validation teams to review test results, debug issues, and update software baselines.</li>
+              <li>Ensuring product deliverables meet technical and timing requirements across cross-functional reviews.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="timeline-item reveal anim-delay-1">
+          <div class="timeline-dot">⚡</div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <div>
+                <div class="timeline-company">Magna International · Troy, MI</div>
+                <h3>Senior Software Engineer</h3>
+              </div>
+              <span class="timeline-date">Apr 2024 – Sep 2025</span>
+            </div>
+            <ul>
+              <li>Built EKF-based state estimation for Vx/Vy, heading, and pose fusing IMU, GPS, and wheel speeds; IMU calibration via I²C; roll/pitch via Kalman & Madgwick.</li>
+              <li>Designed lateral control with rollover index / lateral-g limits and steering impulse; longitudinal accel/decel & regen blending; range estimation.</li>
+              <li>Integrated GNSS-based positioning (NTRIP corrections) into ROS2/Docker pipelines for cm-level accuracy.</li>
+              <li>Developed ML-based algorithm to detect approaching emergency vehicles using YAMNet; built ROS2/Docker CODEC interface for Alerts & Advertisements audio.</li>
+              <li>Mass/grade RLS estimation with ~10% error margin on routes.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="timeline-item reveal anim-delay-2">
+          <div class="timeline-dot">🏎️</div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <div>
+                <div class="timeline-company">Dana Incorporated · Novi, MI</div>
+                <h3>Technical Lead</h3>
+              </div>
+              <span class="timeline-date">Jan 2023 – Apr 2024</span>
+            </div>
+            <ul>
+              <li>Led a team of 6 engineers for software feature development for BEV transmission systems under AUTOSAR and ASPICE frameworks.</li>
+              <li>Designed and implemented control logic for torque management, lubrication, and thermal handling features.</li>
+              <li>Conducted internal technical reviews and supported feature validation and calibration activities.</li>
+              <li>Contributed to project planning, task definition, and coordination with program management and OEM partners.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="timeline-item reveal anim-delay-3">
+          <div class="timeline-dot">🔬</div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <div>
+                <div class="timeline-company">FEV North America · Auburn Hills, MI</div>
+                <h3>Senior Controls Engineer</h3>
+              </div>
+              <span class="timeline-date">Oct 2018 – Jan 2023</span>
+            </div>
+            <ul>
+              <li>Developed torque path control algorithms: creep, dual-path shift energy management, e-coasting, and cost-based torque split optimization for hybrid and BEV programs.</li>
+              <li>LQR-based engine start/idle control profiling; regen-brake interfaces for smooth shift transitions.</li>
+              <li>Led supplier workshops to align on requirements, timeline, and performance validation criteria.</li>
+              <li>Mentored junior engineers on Simulink modeling standards, documentation, and testing procedures.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="timeline-item reveal anim-delay-4">
+          <div class="timeline-dot">🔋</div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <div>
+                <div class="timeline-company">Hybrid Design Services Inc. · Troy, MI</div>
+                <h3>Controls Engineer</h3>
+              </div>
+              <span class="timeline-date">Dec 2016 – Oct 2018</span>
+            </div>
+            <ul>
+              <li>Developed hybrid/EV control strategies using MATLAB/Simulink & Stateflow.</li>
+              <li>Built prototype BMS with SOC estimation via EKF, power limit calculation, and contactor control with weld-check logic.</li>
+              <li>Implemented supervisory controller to log faults via OBD-II and FTP to secure server.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="timeline-item reveal anim-delay-5">
+          <div class="timeline-dot">🏭</div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <div>
+                <div class="timeline-company">General Motors (Contract) · Pontiac, MI</div>
+                <h3>R&D Test Systems Engineer</h3>
+              </div>
+              <span class="timeline-date">Aug 2014 – Dec 2016</span>
+            </div>
+            <ul>
+              <li>Developed Simulink/LabVIEW controls for gasoline and diesel research engines.</li>
+              <li>Built FPGA/DSpace test systems for prototype ECU validation and CAN communication.</li>
+              <li>Performed test cell commissioning by integrating Rapid Control Prototype ECUs and calibrating sensors (MAF, cam phaser, crank encoders, thermocouples).</li>
+            </ul>
+          </div>
+        </div>
+
       </div>
     </section>
 
-    <section id="resume">
-      <h2>Résumé</h2>
-      <div class="card">
-        <p><a class="btn" href="./assets/Avesh_Resume_Updated.pdf" download>Download PDF</a></p>
+    <div class="divider"></div>
+
+    <!-- SKILLS -->
+    <section class="section container" id="skills">
+      <div class="section-header">
+        <span class="section-label">// 03 · capabilities</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 style="margin-bottom: 40px; letter-spacing:-1.5px;">Skills & Tools</h2>
+
+      <div class="skills-grid">
+
+        <div class="skill-block reveal">
+          <div class="skill-block-title">Controls & Systems</div>
+          <div class="skill-chips">
+            <span class="chip">Kalman Filter (EKF)</span>
+            <span class="chip">Particle Filter</span>
+            <span class="chip">LQR / LQI</span>
+            <span class="chip">MPC</span>
+            <span class="chip">RLS Estimation</span>
+            <span class="chip">Vehicle Dynamics</span>
+            <span class="chip">Sensor Fusion</span>
+            <span class="chip">Torque Control</span>
+            <span class="chip">Regen Braking</span>
+            <span class="chip">Feedback Control</span>
+          </div>
+        </div>
+
+        <div class="skill-block reveal anim-delay-1">
+          <div class="skill-block-title">Software & Platforms</div>
+          <div class="skill-chips">
+            <span class="chip">MATLAB / Simulink</span>
+            <span class="chip">Python</span>
+            <span class="chip">C++</span>
+            <span class="chip">ROS2</span>
+            <span class="chip">Docker</span>
+            <span class="chip">LabVIEW</span>
+            <span class="chip">TFLite / YAMNet</span>
+            <span class="chip">JSON / YAML</span>
+          </div>
+        </div>
+
+        <div class="skill-block reveal anim-delay-2">
+          <div class="skill-block-title">Hardware & Protocols</div>
+          <div class="skill-chips">
+            <span class="chip">NXP S32G</span>
+            <span class="chip">Raspberry Pi</span>
+            <span class="chip">DSpace</span>
+            <span class="chip">ETAS / INCA</span>
+            <span class="chip">CAN / SocketCAN</span>
+            <span class="chip">I²C / UART</span>
+            <span class="chip">GNSS / u-blox</span>
+            <span class="chip">MotoHawk</span>
+          </div>
+        </div>
+
+        <div class="skill-block reveal anim-delay-3">
+          <div class="skill-block-title">Process & Leadership</div>
+          <div class="skill-chips">
+            <span class="chip">AUTOSAR</span>
+            <span class="chip">ASPICE</span>
+            <span class="chip">ISO 26262</span>
+            <span class="chip">DOORS / Polarion</span>
+            <span class="chip">Git / Azure</span>
+            <span class="chip">CI/CD</span>
+            <span class="chip">Agile / JIRA</span>
+            <span class="chip">OEM Workshops</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- CONTACT -->
+    <section class="section container" id="contact">
+      <div class="section-header">
+        <span class="section-label">// 04 · reach out</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 style="margin-bottom: 40px; letter-spacing:-1.5px;">Let's Connect</h2>
+
+      <div class="contact-grid">
+        <div class="contact-card reveal">
+          <h3>Get in touch</h3>
+          <a class="contact-item" href="mailto:aveshshah@gmail.com">
+            <div class="contact-icon">✉️</div>
+            <div>
+              <span class="contact-label">Email</span>
+              <span class="contact-value">aveshshah@gmail.com</span>
+            </div>
+          </a>
+          <a class="contact-item" href="tel:+18649916480">
+            <div class="contact-icon">📞</div>
+            <div>
+              <span class="contact-label">Phone</span>
+              <span class="contact-value">(864) 991‑6480</span>
+            </div>
+          </a>
+          <a class="contact-item" href="https://www.avesh-shah.com" target="_blank">
+            <div class="contact-icon">🌐</div>
+            <div>
+              <span class="contact-label">Website</span>
+              <span class="contact-value">www.avesh-shah.com</span>
+            </div>
+          </a>
+        </div>
+
+        <div class="contact-card reveal anim-delay-1" style="display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+            <h3>Download Résumé</h3>
+            <p style="color:var(--muted); font-size:14px; margin-top:10px; line-height:1.7;">Full work history, technical skills, and education in a single PDF — ready to share.</p>
+          </div>
+          <a class="btn btn-primary" style="margin-top:28px; width:fit-content;" href="./assets/Avesh_Resume_Updated.pdf" download>
+            Download PDF →
+          </a>
+        </div>
       </div>
     </section>
   </main>
 
+  <!-- FOOTER -->
   <footer>
-    <div class="container">
-      <p>© <span id="y"></span> Avesh Shah. Built with plain HTML/CSS for fast static hosting.</p>
+    <div class="container footer-inner">
+      <div class="footer-logo">Avesh Shah</div>
+      <div class="footer-copy">© <span id="y"></span> · Rochester Hills, MI · Built with plain HTML/CSS</div>
     </div>
   </footer>
-  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+
+    reveals.forEach(el => observer.observe(el));
+  </script>
 </body>
 </html>
