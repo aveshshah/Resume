@@ -238,6 +238,10 @@
       animation: fadeUp 0.7s ease forwards 0.7s;
     }
 
+    .stats-new {
+      grid-template-columns: 180px 1fr;
+    }
+
     .stat {
       background: var(--surface);
       padding: 32px 28px;
@@ -245,6 +249,19 @@
       transition: background 0.2s;
     }
     .stat:hover { background: var(--surface2); }
+
+    .stat-years {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--border);
+    }
+
+    .stat-specializations {
+      text-align: left;
+      padding: 28px 32px;
+    }
 
     .stat-num {
       font-family: 'Syne', sans-serif;
@@ -260,6 +277,32 @@
       color: var(--muted);
       letter-spacing: 0.5px;
       font-family: 'DM Mono', monospace;
+    }
+
+    .spec-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .spec-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .spec-chip {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      background: rgba(99,179,237,0.07);
+      border: 1px solid var(--border-bright);
+      color: var(--accent);
+      letter-spacing: 0.3px;
     }
 
     /* ── SECTION HEADINGS ── */
@@ -700,22 +743,21 @@
 
     <!-- STATS -->
     <div class="container">
-      <div class="stats">
-        <div class="stat">
+      <div class="stats stats-new">
+        <div class="stat stat-years">
           <div class="stat-num">10+</div>
           <div class="stat-label">Years of Experience</div>
         </div>
-        <div class="stat">
-          <div class="stat-num">6</div>
-          <div class="stat-label">Programs Led</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">cm</div>
-          <div class="stat-label">GNSS Accuracy Achieved</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">&lt;10%</div>
-          <div class="stat-label">Mass/Grade RLS Error</div>
+        <div class="stat stat-specializations">
+          <div class="spec-title">Areas of Interest</div>
+          <div class="spec-chips">
+            <span class="spec-chip">Powertrain Torque Path Controls</span>
+            <span class="spec-chip">Vehicle Dynamics</span>
+            <span class="spec-chip">Battery Management Systems</span>
+            <span class="spec-chip">AI / ML</span>
+            <span class="spec-chip">State Estimation</span>
+            <span class="spec-chip">Autonomous Systems</span>
+          </div>
         </div>
       </div>
     </div>
@@ -1020,11 +1062,11 @@
       <div class="contact-grid">
         <div class="contact-card reveal">
           <h3>Get in touch</h3>
-          <a class="contact-item" href="mailto:aveshshah@gmail.com">
+          <a class="contact-item" href="/cdn-cgi/l/email-protection#e0819685938893888188a0878d81898cce838f8d">
             <div class="contact-icon">✉️</div>
             <div>
               <span class="contact-label">Email</span>
-              <span class="contact-value">aveshshah@gmail.com</span>
+              <span class="contact-value"><span class="__cf_email__" data-cfemail="2041564553485348414860474d41494c0e434f4d">[email&#160;protected]</span></span>
             </div>
           </a>
           <a class="contact-item" href="tel:+18649916480">
@@ -1064,7 +1106,7 @@
     </div>
   </footer>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     document.getElementById('y').textContent = new Date().getFullYear();
 
     // Scroll reveal
@@ -1072,13 +1114,4 @@
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((e, i) => {
         if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          observer.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
-
-    reveals.forEach(el => observer.observe(el));
-  </script>
-</body>
-</html>
+ 
