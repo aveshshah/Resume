@@ -579,6 +579,15 @@
       .section { padding: 48px 0; }
     }
   </style>
+
+  <!-- MathJax for equation rendering -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 
@@ -712,6 +721,30 @@
       .usage, .cap-grid { grid-template-columns:1fr; }
       .stat-row { grid-template-columns:repeat(2,1fr); }
     }
+
+    /* ── ROLL-LIMIT SECTION ── */
+    .eq-wrap { display:grid; gap:14px; margin:4px 0 8px; }
+    .eq-card { background:var(--surface); border:1px solid var(--border); border-radius:14px;
+      padding:18px 24px; overflow-x:auto; color:var(--text); }
+    .eq-card .eq-label { font-family:'DM Mono',monospace; font-size:10.5px; letter-spacing:1.5px;
+      text-transform:uppercase; color:var(--accent2); margin-bottom:8px; }
+    .eq-card mjx-container { margin:0 !important; }
+    .roll-note { color:var(--muted); font-size:14.5px; line-height:1.75; }
+    .roll-note em { color:var(--text); font-style:normal; }
+    .geo-fig { border:1px solid var(--border); border-radius:16px; overflow:hidden;
+      background:var(--surface); margin:8px 0 26px; }
+    .geo-fig svg { width:100%; height:auto; display:block; }
+    .geo-fig .rc { padding:14px 22px; border-top:1px solid var(--border);
+      font-family:'DM Mono',monospace; font-size:11.5px; color:var(--muted); line-height:1.6; }
+    .sym-list { list-style:none; display:grid; grid-template-columns:repeat(2,1fr);
+      gap:6px 28px; margin:14px 0 0; font-size:13.5px; color:var(--muted); }
+    .sym-list li b { color:var(--text); font-weight:500; font-family:'DM Mono',monospace;
+      margin-right:8px; }
+    .refnote { font-size:12.5px; color:var(--muted); line-height:1.7;
+      border-left:2px solid var(--border-bright); padding:8px 16px; margin-top:14px; }
+    .refnote a { color:var(--accent); text-decoration:none; }
+    .refnote a:hover { text-decoration:underline; }
+    @media (max-width:640px){ .sym-list { grid-template-columns:1fr; } }
   </style>
 
   <!-- ============ HERO ============ -->
@@ -761,10 +794,186 @@
     </div>
   </section>
 
+  <!-- ============ THE ROLL LIMIT ============ -->
+  <section class="section container">
+    <div class="section-header">
+      <span class="section-label">// 02 · the roll limit</span>
+      <div class="section-line"></div>
+    </div>
+    <h2 style="margin-bottom:18px; letter-spacing:-1.5px;">Where the lateral-acceleration limit comes from</h2>
+
+    <p class="pd-lede" style="margin-bottom:30px;">The NMPC never reasons about rollover directly.
+      Each step it consumes a single scalar — the limiting lateral acceleration
+      \(a_y^{\lim}\) — and enforces it as a hard constraint on the predicted motion. That scalar is
+      produced by a standalone <b>geometry-based roll-avoidance algorithm</b> that treats the pod as a
+      rigid body and works from its wheel geometry plus a live estimate of the center of gravity.</p>
+
+    <div class="detail-grid-3" style="margin-bottom:34px;">
+      <div class="dcol reveal">
+        <div class="kick">The tipping axis</div>
+        <h3>Not a symmetric base</h3>
+        <p>On a tadpole the support polygon is a triangle — two front contact patches, one at the
+          rear. In a turn the pod rolls about the line joining the <em>outer front</em> wheel to the
+          <em>single rear</em> wheel: a diagonal axis, not the vehicle centerline.</p>
+      </div>
+      <div class="dcol reveal">
+        <div class="kick">Rigid-body model</div>
+        <h3>Static threshold</h3>
+        <p>Suspension compliance and transient load transfer are set aside; the limit is the steady
+          rigid-body point at which the weight vector reaches the tipping axis. It is conservative and
+          cheap enough to recompute inside the control loop.</p>
+      </div>
+      <div class="dcol reveal">
+        <div class="kick">Live CG</div>
+        <h3>Inertial sensing</h3>
+        <p>Inertial sensors track dynamic in-plane migration of the CG, so the moment arm reflects the
+          current load state. Because the pod is loaded from the top in a fixed configuration, CG
+          shifts along the vertical (Z) axis are held constant and ignored.</p>
+      </div>
+    </div>
+
+    <!-- original geometry schematic -->
+    <div class="geo-fig reveal">
+      <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="Left: top view of a tadpole three-wheeler showing the tipping axis from the outer front wheel to the rear wheel, the CG, and the perpendicular moment arm d. Right: rear view showing CG height h and road bank angle phi.">
+        <defs>
+          <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="#63b3ed"/>
+          </marker>
+          <marker id="ah2" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="#4fd1c5"/>
+          </marker>
+          <marker id="ahm" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+            <path d="M0,0 L7,3.5 L0,7 Z" fill="#6b8aa8"/>
+          </marker>
+        </defs>
+        <style>
+          .lbl  { font-family:'DM Mono',monospace; font-size:12px; fill:#dce8f5; }
+          .lblm { font-family:'DM Mono',monospace; font-size:11px; fill:#6b8aa8; }
+          .ttl  { font-family:'DM Mono',monospace; font-size:10.5px; letter-spacing:1.5px;
+                  text-transform:uppercase; fill:#6b8aa8; }
+        </style>
+
+        <!-- divider -->
+        <line x1="360" y1="30" x2="360" y2="270" stroke="rgba(99,179,237,0.16)" stroke-dasharray="3 5"/>
+
+        <!-- ── LEFT: TOP VIEW ── -->
+        <text x="40" y="34" class="ttl">top view</text>
+        <!-- support polygon -->
+        <polygon points="95,80 245,80 170,235" fill="rgba(99,179,237,0.05)"
+                 stroke="rgba(107,138,168,0.5)" stroke-width="1"/>
+        <!-- wheels -->
+        <rect x="82"  y="72" width="26" height="16" rx="4" fill="#0c1628" stroke="#6b8aa8" stroke-width="1.4"/>
+        <rect x="232" y="72" width="26" height="16" rx="4" fill="#0c1628" stroke="#6b8aa8" stroke-width="1.4"/>
+        <rect x="159" y="227" width="22" height="16" rx="4" fill="#0c1628" stroke="#6b8aa8" stroke-width="1.4"/>
+        <!-- tipping axis: outer-front → rear -->
+        <line x1="245" y1="80" x2="170" y2="235" stroke="#4fd1c5" stroke-width="2.2" stroke-dasharray="7 5"/>
+        <text x="252" y="168" class="lbl" fill="#4fd1c5">tipping axis</text>
+        <!-- moment arm d (CG → foot on axis) -->
+        <line x1="170" y1="150" x2="203" y2="166" stroke="#63b3ed" stroke-width="1.8" marker-end="url(#ah)"/>
+        <text x="176" y="140" class="lbl" fill="#63b3ed">d</text>
+        <!-- CG -->
+        <circle cx="170" cy="150" r="5.5" fill="#f6c90e"/>
+        <text x="150" y="146" class="lbl" fill="#f6c90e">CG</text>
+        <!-- lateral accel arrow -->
+        <line x1="176" y1="150" x2="228" y2="150" stroke="#63b3ed" stroke-width="1.6" marker-end="url(#ah)"/>
+        <text x="200" y="143" class="lbl">a_y</text>
+        <!-- front track dimension -->
+        <line x1="95" y1="56" x2="245" y2="56" stroke="#6b8aa8" stroke-width="1" marker-start="url(#ahm)" marker-end="url(#ahm)"/>
+        <text x="152" y="50" class="lblm">t_f</text>
+        <!-- wheelbase dimension -->
+        <line x1="58" y1="80" x2="58" y2="235" stroke="#6b8aa8" stroke-width="1" marker-start="url(#ahm)" marker-end="url(#ahm)"/>
+        <text x="40" y="162" class="lblm">L</text>
+
+        <!-- ── RIGHT: REAR VIEW ── -->
+        <text x="420" y="34" class="ttl">rear view (banked)</text>
+        <!-- horizontal reference -->
+        <line x1="430" y1="222" x2="675" y2="222" stroke="rgba(107,138,168,0.4)" stroke-width="1" stroke-dasharray="4 5"/>
+        <!-- banked ground -->
+        <line x1="440" y1="235" x2="672" y2="200" stroke="#4fd1c5" stroke-width="2"/>
+        <!-- bank angle arc -->
+        <path d="M472,222 A32,32 0 0,0 470,217" fill="none" stroke="#4fd1c5" stroke-width="1.4"/>
+        <text x="478" y="216" class="lbl" fill="#4fd1c5">φ</text>
+        <!-- vehicle body (tilted with road) -->
+        <polygon points="512,222 620,206 623,172 515,188" fill="rgba(99,179,237,0.06)"
+                 stroke="#6b8aa8" stroke-width="1.3"/>
+        <!-- contact ticks -->
+        <circle cx="514" cy="220" r="3.5" fill="#6b8aa8"/>
+        <circle cx="621" cy="204" r="3.5" fill="#6b8aa8"/>
+        <!-- CG + height -->
+        <circle cx="566" cy="192" r="5.5" fill="#f6c90e"/>
+        <text x="574" y="190" class="lbl" fill="#f6c90e">CG</text>
+        <line x1="566" y1="214" x2="566" y2="198" stroke="#63b3ed" stroke-width="1.6" marker-end="url(#ah)"/>
+        <text x="540" y="210" class="lbl" fill="#63b3ed">h</text>
+        <!-- weight + lateral accel at CG -->
+        <line x1="566" y1="192" x2="566" y2="240" stroke="#6b8aa8" stroke-width="1.4" marker-end="url(#ahm)"/>
+        <text x="572" y="236" class="lblm">mg</text>
+        <line x1="566" y1="192" x2="612" y2="185" stroke="#63b3ed" stroke-width="1.5" marker-end="url(#ah)"/>
+        <text x="600" y="178" class="lbl">a_y</text>
+      </svg>
+      <div class="rc">Tadpole tipping geometry — the roll axis runs from the outer front contact patch
+        to the single rear wheel; \(d\) is the perpendicular distance from the CG to that axis and
+        \(h\) its height above the road plane. Original schematic.</div>
+    </div>
+
+    <p class="roll-note" style="margin:0 0 8px;">On flat ground, rollover impends when the overturning
+      moment from the lateral inertial force acting at CG height \(h\) equals the restoring moment of
+      the weight acting at the moment arm \(d\). Setting \(m\,a_y\,h = m\,g\,d\) and resolving \(d\) for
+      the tadpole geometry gives:</p>
+
+    <div class="eq-wrap">
+      <div class="eq-card reveal">
+        <div class="eq-label">flat ground — rollover threshold</div>
+        \[
+          a_y^{\lim} \;=\; \frac{g}{h}\,d
+          \;=\; \frac{g}{h}\cdot\frac{\tfrac{t_f}{2}\,b}{\sqrt{L^{2}+\left(\tfrac{t_f}{2}\right)^{2}}}
+          \;\approx\; \frac{g\,t_f\,b}{2\,h\,L}
+        \]
+      </div>
+    </div>
+
+    <ul class="sym-list">
+      <li><b>g</b> gravitational acceleration</li>
+      <li><b>h</b> CG height above the road plane</li>
+      <li><b>t_f</b> front track width</li>
+      <li><b>L</b> wheelbase (front axle → rear wheel)</li>
+      <li><b>b</b> longitudinal CG-to-rear-wheel distance</li>
+      <li><b>d</b> perpendicular CG-to-tipping-axis distance</li>
+      <li><b>φ</b> road bank angle (favorable positive)</li>
+      <li><b>θ</b> road grade (longitudinal slope)</li>
+    </ul>
+
+    <p class="roll-note" style="margin:24px 0 8px;">The \(b/L\) factor is what separates the tadpole
+      from a symmetric vehicle: as the CG migrates toward the single rear wheel (\(b\to 0\)) the margin
+      collapses, while a CG near the wide front track (\(b\to L\)) recovers the full \(g\,t_f/2h\)
+      limit. Road configuration then reshapes the balance — a favorable bank angle \(\phi\) contributes
+      a restoring gravity component, while a grade \(\theta\) reduces the effective normal load:</p>
+
+    <div class="eq-wrap">
+      <div class="eq-card reveal">
+        <div class="eq-label">banked &amp; sloped road — road-plane balance</div>
+        \[
+          a_y^{\lim} \;=\; g\,\cos\theta\left(\frac{d}{h}\cos\phi \;+\; \sin\phi\right)
+        \]
+      </div>
+    </div>
+
+    <p class="roll-note" style="margin:22px 0 0;">The same rigid-body construction is evaluated for
+      flat, sloped, and banked surfaces, and the tightest limit for the current road configuration is
+      handed to the NMPC as \(a_y^{\lim}\). The road-configuration treatment follows the rigid-body
+      rollover analysis in <a href="https://www.researchgate.net/publication/315903416_Rollover_stabilities_of_three-wheeled_vehicles_including_road_configuration_effects"
+      target="_blank" rel="noopener">“Rollover Stabilities of Three-Wheeled Vehicles Including Road
+      Configuration Effects.”</a></p>
+
+    <div class="refnote">Note: the equations above are the standard rigid-body rollover relations,
+      derived here for the tadpole tipping axis — not reproduced from the reference. The paper is
+      cited for its flat/slope/banking road-configuration framework.</div>
+  </section>
+
   <!-- ============ CAPABILITIES ============ -->
   <section class="section container">
     <div class="section-header">
-      <span class="section-label">// 02 · under the hood</span>
+      <span class="section-label">// 03 · under the hood</span>
       <div class="section-line"></div>
     </div>
     <h2 style="margin-bottom:36px; letter-spacing:-1.5px;">The rest of the stack</h2>
@@ -804,7 +1013,7 @@
   <!-- ============ RESULTS ============ -->
   <section class="section container">
     <div class="section-header">
-      <span class="section-label">// 03 · closed-loop results</span>
+      <span class="section-label">// 04 · closed-loop results</span>
       <div class="section-line"></div>
     </div>
     <h2 style="margin-bottom:30px; letter-spacing:-1.5px;">Running in CARLA</h2>
