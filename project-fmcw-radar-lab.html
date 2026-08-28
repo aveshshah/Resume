@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FMCW Radar Lab — Avesh Shah</title>
+<meta name="description" content="How a simulated 77 GHz FMCW radar measures range, velocity and direction, and how those measurements drive an ACC controller. Gazebo + ROS 2." />
+<meta name="theme-color" content="#040812" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#040812; --surface:#080f1e; --surface2:#0c1628;
+  --border:rgba(99,179,237,0.12); --border-bright:rgba(99,179,237,0.3);
+  --text:#dce8f5; --muted:#6b8aa8;
+  --accent:#63b3ed; --accent2:#4fd1c5; --accent3:#f6c90e;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+
+/* nav */
+header{position:sticky;top:0;z-index:100;background:rgba(4,8,18,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+nav{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 24px}
+.logo{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;letter-spacing:-0.4px}
+.logo span{color:var(--accent)}
+.navlinks{display:flex;gap:6px;align-items:center}
+.navlinks a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;letter-spacing:.5px;padding:6px 14px;border-radius:6px;font-family:'DM Mono',monospace;transition:color .2s,background .2s}
+.navlinks a:hover{color:var(--accent);background:rgba(99,179,237,.08)}
+@media(max-width:640px){.navlinks a:not(.back){display:none}}
+
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+
+/* hero */
+.hero{padding:70px 0 40px;border-bottom:1px solid var(--border)}
+.kicker{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);margin-bottom:14px}
+h1{font-family:'Syne',sans-serif;font-size:clamp(30px,5vw,50px);font-weight:700;line-height:1.1;letter-spacing:-1.5px;margin-bottom:18px}
+.lede{font-size:17px;color:var(--muted);max-width:760px}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.tag{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.6px;padding:6px 12px;border:1px solid var(--border-bright);border-radius:6px;color:var(--accent)}
+
+/* spec strip */
+.specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:36px 0}
+.spec{background:var(--surface);padding:18px 20px}
+.spec .k{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.spec .v{font-family:'Syne',sans-serif;font-size:20px;font-weight:600;color:var(--text);margin-top:6px}
+
+/* sections */
+section{padding:52px 0;border-bottom:1px solid var(--border)}
+.sec-index{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--accent2);text-transform:uppercase;margin-bottom:10px}
+h2{font-family:'Syne',sans-serif;font-size:clamp(22px,3vw,30px);font-weight:600;letter-spacing:-.6px;margin-bottom:16px;line-height:1.25}
+h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:600;margin:26px 0 10px;color:var(--text)}
+p{margin-bottom:14px;color:#b8cbe0}
+p.small{font-size:14px;color:var(--muted)}
+strong{color:var(--text);font-weight:600}
+.mono{font-family:'DM Mono',monospace;color:var(--accent)}
+
+/* figure + video */
+figure{margin:26px 0}
+figure img,video{width:100%;display:block;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+figcaption{font-size:13px;color:var(--muted);margin-top:10px;font-family:'DM Mono',monospace}
+
+/* two-col */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:34px}
+@media(max-width:820px){.cols{grid-template-columns:1fr;gap:20px}}
+
+/* callout */
+.callout{background:var(--surface2);border:1px solid var(--border-bright);border-left:3px solid var(--accent);border-radius:10px;padding:20px 22px;margin:24px 0}
+.callout .t{font-family:'Syne',sans-serif;font-weight:600;margin-bottom:8px}
+.callout p{margin:0;font-size:15px}
+
+/* steps */
+ol.steps{list-style:none;counter-reset:s;margin:18px 0}
+ol.steps li{counter-increment:s;position:relative;padding-left:44px;margin-bottom:18px;color:#b8cbe0}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;width:28px;height:28px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-bright);color:var(--accent);font-family:'DM Mono',monospace;font-size:12px;display:flex;align-items:center;justify-content:center}
+ol.steps li b{color:var(--text)}
+
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:24px 0}
+.pipe .node{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+.pipe .node.last{border-color:var(--accent);background:rgba(99,179,237,.07)}
+.pipe .node b{display:block;font-size:14px;font-family:'Syne',sans-serif}
+.pipe .node span{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+
+/* table */
+table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px}
+th{text-align:left;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--border-bright)}
+td{padding:11px 12px;border-bottom:1px solid var(--border);color:#b8cbe0}
+td:first-child{color:var(--text)}
+td.num{font-family:'DM Mono',monospace;color:var(--accent)}
+
+footer{padding:40px 0 60px;text-align:center;color:var(--muted);font-size:13px}
+footer a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="logo">Avesh <span>Shah</span></div>
+    <div class="navlinks">
+      <a href="#watch">Overview</a>
+      <a href="#range">Range</a>
+      <a href="#velocity">Velocity</a>
+      <a href="#detect">Detection</a>
+      <a href="#acc">ACC</a>
+      <a class="back" href="index.html">← Portfolio</a>
+    </div>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="kicker">CorridorFusion · Gazebo + ROS 2</div>
+    <h1>How this radar measures range, speed and direction</h1>
+    <p class="lede">These notes follow the radar signal in the order it is actually processed — from the transmitted chirp and its reflected echo, through the Range and Doppler FFTs, to angle estimation, CFAR detection, tracking, and finally the ACC controller that acts on it.</p>
+    <div class="tags">
+      <span class="tag">77 GHz FMCW</span>
+      <span class="tag">ROS 2 Humble</span>
+      <span class="tag">Gazebo</span>
+      <span class="tag">C++ / DSP</span>
+      <span class="tag">Adaptive Cruise Control</span>
+    </div>
+
+    <div class="specs">
+      <div class="spec"><div class="k">Carrier</div><div class="v">77 GHz</div></div>
+      <div class="spec"><div class="k">Bandwidth</div><div class="v">250 MHz</div></div>
+      <div class="spec"><div class="k">Frame</div><div class="v">64 chirps</div></div>
+      <div class="spec"><div class="k">Array</div><div class="v">4 RX</div></div>
+      <div class="spec"><div class="k">Range res.</div><div class="v">0.600 m</div></div>
+      <div class="spec"><div class="k">Velocity res.</div><div class="v">0.760 m/s</div></div>
+    </div>
+  </div>
+
+  <!-- 1. RECORDING -->
+  <section id="watch">
+    <div class="sec-index">01 — The recorded experiment</div>
+    <h2>Start by watching the vehicle and the radar plots together</h2>
+    <p>Gazebo provides the simulated road, vehicles and reflections. ROS 2 carries the radar measurements and vehicle data between the processing, tracking and control nodes. The plots show the beat I/Q signal, Range FFT, Doppler FFT, Range–Doppler map and angle estimate, all produced from the same frame.</p>
+
+    <figure>
+      <video controls preload="metadata" playsinline poster="assets/radar/media/gazebo-radar-poster.jpg">
+        <source src="assets/radar/media/gazebo-radar.mp4" type="video/mp4">
+        <source src="assets/radar/media/gazebo-radar.webm" type="video/webm">
+        Your browser does not support HTML5 video.
+      </video>
+      <figcaption>Gazebo scene and live radar plots, recorded together on the corridor loop.</figcaption>
+    </figure>
+
+    <h3>What to look for</h3>
+    <ol class="steps">
+      <li><b>Range FFT</b> — the peak position estimates target distance.</li>
+      <li><b>Doppler FFT</b> — the peak bin measures range rate across chirps.</li>
+      <li><b>3-D view</b> — each point combines range, velocity and azimuth into one detection.</li>
+    </ol>
+
+    <div class="callout">
+      <div class="t">Radial-speed check</div>
+      <p><span class="mono">v_r ≈ v_lead − v_ego</span> &nbsp;·&nbsp; positive means opening, negative means closing, zero means a constant gap. The selected Doppler value is <strong>relative</strong> radial velocity, not the lead vehicle's absolute speed.</p>
+    </div>
+  </section>
+
+  <!-- 2. RANGE -->
+  <section id="range">
+    <div class="sec-index">02 — One chirp gives us range</div>
+    <h2>Turn the echo into a slow signal the ADC can record</h2>
+    <p>A 77 GHz wave is far too fast to digitise directly. The mixer removes the common fast motion and leaves only the small difference between the transmitted chirp and its delayed echo.</p>
+
+    <div class="cols">
+      <div>
+        <h3>The echo is late, not different</h3>
+        <p>Think of the radar sounding a note that steadily rises. The reflected copy returns after a delay <span class="mono">τ</span>. At any instant the transmitter has already climbed to a higher frequency while the echo is still repeating an earlier, lower one. That vertical gap is the <strong>beat frequency</strong> <span class="mono">f_b</span>.</p>
+        <p class="small">Same slope. The echo is simply late.</p>
+      </div>
+      <div>
+        <h3>The mixer exposes the difference</h3>
+        <p>A mixer multiplies the transmitted reference by the received wave. The product contains one very fast sum term and one slow difference term; a low-pass filter removes the fast part. What remains is the beat wave the ADC samples.</p>
+        <p class="small mono">TX × RX → ½·cos[2π(f_TX − f_RX)t] + ½·(fast term, filtered out)</p>
+      </div>
+    </div>
+
+    <h3>Range in four steps</h3>
+    <ol class="steps">
+      <li><b>Slope.</b> The chirp climbs at <span class="mono">S = B / T_c</span>.</li>
+      <li><b>Delay.</b> The round trip takes <span class="mono">τ = 2R / c</span>.</li>
+      <li><b>Gap.</b> While waiting, the transmitter climbed by <span class="mono">f_b = S · τ</span>.</li>
+      <li><b>Invert.</b> Therefore <span class="mono">R = c · f_b / (2S)</span>.</li>
+    </ol>
+
+    <div class="callout">
+      <div class="t">Why resolution depends only on bandwidth</div>
+      <p>A longer chirp flattens the slope, so the beat frequency falls — but you observe for proportionally longer, and the two effects cancel exactly. Only the total sweep survives: <span class="mono">ΔR = c / 2B = 0.600 m</span>.</p>
+    </div>
+  </section>
+
+  <!-- 3. VELOCITY -->
+  <section id="velocity">
+    <div class="sec-index">03 — Many chirps give us velocity</div>
+    <h2>Repeat the chirp and watch one range bin rotate in phase</h2>
+
+    <div class="cols">
+      <div>
+        <h3>One chirp gives one row</h3>
+        <p>Each chirp produces a full row of range bins. Running the Range FFT for every chirp in the frame stacks those rows into a two-dimensional map: range across, chirp index down.</p>
+        <h3>Keep the same range bin</h3>
+        <p>Pick the bin holding the target and read it once per chirp. Its magnitude barely changes. Its <strong>phase</strong> does.</p>
+      </div>
+      <div>
+        <h3>A tiny movement, a measurable phase change</h3>
+        <p>Between two chirps a target closing at 6 m/s moves only 0.24 mm — far below the 0.600 m range cell, so it never changes bin. But the wavelength is just 3.9 mm, so that motion advances the returning wave by about 12% of a cycle: a <strong>44° phase step per chirp</strong>.</p>
+        <p>A second FFT down the chirp axis measures that rotation rate directly.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="t">Velocity resolution</div>
+      <p><span class="mono">Δv = λ / (2 · N · PRI) = 0.760 m/s</span> with 64 chirps. The distance a target must gain over the whole frame is always half a wavelength — about 1.95 mm — so listening longer is what buys finer speed resolution.</p>
+    </div>
+  </section>
+
+  <!-- 4. PIPELINE -->
+  <section id="pipeline">
+    <div class="sec-index">04 — Putting it together</div>
+    <h2>The processing chain end to end</h2>
+
+    <div class="pipe">
+      <div class="node"><b>Transmit chirp</b><span>77 GHz sweep</span></div>
+      <div class="node"><b>Scene reflection</b><span>delayed echo</span></div>
+      <div class="node"><b>Dechirp + LPF</b><span>beat signal</span></div>
+      <div class="node"><b>ADC data cube</b><span>rx × chirp × sample</span></div>
+      <div class="node"><b>Range FFT</b><span>fast time</span></div>
+      <div class="node"><b>Doppler FFT</b><span>slow time</span></div>
+      <div class="node"><b>CFAR + AOA</b><span>detections</span></div>
+      <div class="node last"><b>Track + ACC</b><span>acceleration</span></div>
+    </div>
+
+    <figure>
+      <img src="assets/radar/figures/radar_processing_block_diagram.png" alt="Block diagram of the radar processing chain from transmit chirp through to tracking and ACC" loading="lazy">
+      <figcaption>The full signal chain, from transmitted chirp to the acceleration command.</figcaption>
+    </figure>
+
+    <h3>A complete detection</h3>
+    <table>
+      <thead><tr><th>Quantity</th><th>Comes from</th><th>Resolution</th></tr></thead>
+      <tbody>
+        <tr><td>Range</td><td>Range FFT peak position</td><td class="num">0.600 m</td></tr>
+        <tr><td>Radial velocity</td><td>Doppler FFT peak bin</td><td class="num">0.760 m/s</td></tr>
+        <tr><td>Direction (AOA)</td><td>Phase across the RX array</td><td class="num">4 RX aperture</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 5. EQUATIONS -->
+  <section id="equations">
+    <div class="sec-index">05 — Reference</div>
+    <h2>The main equations in one place</h2>
+    <figure>
+      <img src="assets/radar/figures/radar_equations.png" alt="Summary of the FMCW radar equations for range, velocity and resolution" loading="lazy">
+      <figcaption>Range, velocity, and the resolution limits that follow from the waveform parameters.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 6. CFAR -->
+  <section id="detect">
+    <div class="sec-index">06 — Detection</div>
+    <h2>CFAR compares each candidate with its local background</h2>
+    <p>Received power falls as the fourth power of range, so no single fixed threshold can serve both near and far targets. Cell-averaging CFAR estimates the noise locally and floats the threshold with it, which keeps the false-alarm rate constant across the whole map.</p>
+
+    <div class="cols">
+      <div>
+        <h3>Cell under test</h3>
+        <p>The candidate being judged.</p>
+        <h3>Guard cells</h3>
+        <p>Excluded from the noise estimate, because a real target spills energy into its neighbours and would otherwise raise its own bar.</p>
+      </div>
+      <div>
+        <h3>Training cells</h3>
+        <p>Averaged to estimate the local noise floor, then scaled by a factor derived from the desired false-alarm probability.</p>
+        <h3>Cluster + gate</h3>
+        <p>Surviving detections are merged in range, azimuth and Doppler so one vehicle produces one point rather than several.</p>
+      </div>
+    </div>
+
+    <figure>
+      <img src="assets/radar/figures/cfar_explainer.png" alt="CFAR window showing cell under test, guard cells and training cells" loading="lazy">
+      <figcaption>The CFAR window: cell under test, guard cells, and the training cells that set the threshold.</figcaption>
+    </figure>
+
+    <div class="callout">
+      <div class="t">The point of a floating threshold</div>
+      <p>A cell scoring 50 with neighbours near 10 is a detection. The same score of 50 with neighbours near 46 is noise. Absolute magnitude carries no information on its own — only the contrast with its surroundings does.</p>
+    </div>
+  </section>
+
+  <!-- 7. ACC -->
+  <section id="acc">
+    <div class="sec-index">07 — Using it</div>
+    <h2>From detections to an acceleration command</h2>
+    <p>Detections become persistent objects in an EKF tracker, one filter per target with state <span class="mono">x, y, vx, vy</span>. The radial-velocity update is applied only along the line-of-sight direction, because radar cannot observe tangential motion and correcting both components would inject fictitious lateral velocity.</p>
+    <p>Lead selection then projects each confirmed track onto the ego vehicle's predicted path — an arc, not a straight line — and keeps the nearest one inside the lane corridor. On a curve this matters: a straight-line corridor test starts misclassifying adjacent-lane vehicles from roughly 30 m outward.</p>
+
+    <h3>The following law</h3>
+    <p>Desired gap is a constant time headway, <span class="mono">4.0 m + 1.8 s × v</span>. Gaps that grow with speed are what make a platoon string stable. The acceleration request combines three terms: gap error, relative speed, and lead acceleration as feed-forward.</p>
+
+    <div class="callout">
+      <div class="t">Where sensor quality shows up in the controller</div>
+      <p>The relative-speed gain is several times the gap gain, so the largest gain in the loop multiplies the noisiest available signal. One Doppler bin flip becomes a step in the acceleration request — which is why velocity resolution, not range resolution, turned out to be the parameter that limited ride quality.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p><a href="index.html">← Back to portfolio</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
