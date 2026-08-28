@@ -116,6 +116,101 @@
     }
     .nav-cta:hover { opacity: 0.9; background: var(--accent) !important; }
 
+    /* ── LEARNER HUB DROPDOWN ── */
+    .nav-dropdown { position: relative; }
+    .nav-dropdown > .nav-trigger {
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      font-family: 'DM Mono', monospace;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-dropdown > .nav-trigger:hover,
+    .nav-dropdown.open > .nav-trigger {
+      color: var(--accent);
+      background: rgba(99,179,237,0.08);
+    }
+    .nav-trigger .caret {
+      width: 0; height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid currentColor;
+      transition: transform 0.2s;
+    }
+    .nav-dropdown.open .caret { transform: rotate(180deg); }
+
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      min-width: 290px;
+      background: var(--surface2);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      padding: 8px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.55), 0 0 0 1px rgba(99,179,237,0.05);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-6px);
+      transition: opacity 0.18s, transform 0.18s, visibility 0.18s;
+      z-index: 200;
+    }
+    .nav-dropdown.open .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .dropdown-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 12px 6px;
+    }
+    .dropdown-menu a {
+      display: block;
+      padding: 10px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .dropdown-menu a:hover { background: rgba(99,179,237,0.10); color: var(--accent); }
+    .dropdown-menu a .dd-sub {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+      font-weight: 400;
+    }
+    .dropdown-menu a:hover .dd-sub { color: var(--accent2); }
+
+    /* mobile drawer sub-items */
+    .mobile-menu .mobile-sublabel {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+    .mobile-menu a.mobile-subitem { font-size: 17px; opacity: 0.92; }
+
     /* ── HAMBURGER BUTTON ── */
     .hamburger {
       display: none;
@@ -599,6 +694,20 @@
         <a href="#skills">Skills</a>
         <a href="#contact">Contact</a>
         <a href="project-mpc-roll-avoidance.html">Project Details</a>
+
+        <div class="nav-dropdown" id="learnerHub">
+          <button class="nav-trigger" id="learnerHubBtn" aria-expanded="false" aria-haspopup="true" aria-controls="learnerHubMenu">
+            Learner Hub <span class="caret"></span>
+          </button>
+          <div class="dropdown-menu" id="learnerHubMenu" role="menu" aria-labelledby="learnerHubBtn">
+            <div class="dropdown-label">Projects</div>
+            <a role="menuitem" href="project-fmcw-radar-lab.html">
+              FMCW Radar Lab
+              <span class="dd-sub">Range-Doppler processing &amp; ACC</span>
+            </a>
+          </div>
+        </div>
+
         <a class="nav-cta" href="./assets/Avesh_Resume_Updated.pdf" download>Résumé ↓</a>
       </div>
 
@@ -618,6 +727,8 @@
     <a href="#skills" class="mobile-nav-link">Skills</a>
     <a href="#contact" class="mobile-nav-link">Contact</a>
     <a href="project-mpc-roll-avoidance.html" class="mobile-nav-link">Project Details</a>
+    <div class="mobile-sublabel">Learner Hub</div>
+    <a href="project-fmcw-radar-lab.html" class="mobile-nav-link mobile-subitem">FMCW Radar Lab</a>
     <a class="mobile-cta" href="./assets/Avesh_Resume_Updated.pdf" download>Résumé ↓</a>
   </div>
 
@@ -994,6 +1105,32 @@
 
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
+
+    // ── LEARNER HUB DROPDOWN ──
+    const learnerHub = document.getElementById('learnerHub');
+    const learnerHubBtn = document.getElementById('learnerHubBtn');
+    if (learnerHub && learnerHubBtn) {
+      learnerHubBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = learnerHub.classList.toggle('open');
+        learnerHubBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      // click anywhere else closes it
+      document.addEventListener('click', (e) => {
+        if (!learnerHub.contains(e.target)) {
+          learnerHub.classList.remove('open');
+          learnerHubBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+      // Escape closes it and returns focus to the trigger
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && learnerHub.classList.contains('open')) {
+          learnerHub.classList.remove('open');
+          learnerHubBtn.setAttribute('aria-expanded', 'false');
+          learnerHubBtn.focus();
+        }
+      });
+    }
 
     // ── HAMBURGER MENU ──
     const hamburger = document.getElementById('hamburger');
