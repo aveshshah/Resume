@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MPC Trajectory Tracking & Roll Avoidance — Avesh Shah</title>
-  <meta name="description" content="Deep dive: real-time NMPC trajectory tracking and geometry-based roll-avoidance for a three-wheeled autonomous pod in CARLA — by Avesh Shah." />
+  <meta name="description" content="Project write-up: real-time NMPC path tracking and roll avoidance, with an active anti-roll bar and a space-time Hybrid A* local planner, for a three-wheeled pod in CARLA — by Avesh Shah." />
   <meta name="theme-color" content="#040812" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -745,20 +745,44 @@
     .refnote a { color:var(--accent); text-decoration:none; }
     .refnote a:hover { text-decoration:underline; }
     @media (max-width:640px){ .sym-list { grid-template-columns:1fr; } }
+    .subhead { font-family:'Syne',sans-serif; font-size:22px; font-weight:700; letter-spacing:-.4px;
+      color:var(--text); margin:56px 0 14px; }
+    .stat-row.three { grid-template-columns:repeat(3,1fr); margin:8px 0 22px; }
+    @media (max-width:820px){ .stat-row.three { grid-template-columns:1fr; } }
+    .roll-note a, .pd-lede a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(99,179,237,0.4); }
+    .roll-note a:hover { border-bottom-color: var(--accent); }
+    .tbl-wrap { border:1px solid var(--border); border-radius:14px; overflow-x:auto;
+      background:var(--surface); margin:10px 0 8px; }
+    .pd-table { width:100%; border-collapse:collapse; font-size:13.5px; }
+    .pd-table th { font-family:'DM Mono',monospace; font-size:10.5px; letter-spacing:1.2px;
+      text-transform:uppercase; color:var(--accent2); font-weight:500; text-align:left;
+      padding:13px 18px; border-bottom:1px solid var(--border-bright); white-space:nowrap; }
+    .pd-table td { padding:11px 18px; border-bottom:1px solid var(--border); color:var(--muted);
+      vertical-align:top; line-height:1.6; }
+    .pd-table tr:last-child td { border-bottom:none; }
+    .pd-table td:first-child { color:var(--text); white-space:nowrap; }
+    .flow-fig { border:1px solid var(--border); border-radius:16px; overflow:hidden;
+      background:var(--surface); margin:20px 0 22px; }
+    .flow-fig svg { width:100%; height:auto; display:block; }
+    .flow-fig .rc { padding:14px 22px; border-top:1px solid var(--border);
+      font-family:'DM Mono',monospace; font-size:11.5px; color:var(--muted); line-height:1.6; }
+    .roll-note em { color:var(--text); font-style:normal; }
+    @media (max-width:640px){ .pd-table td:first-child { white-space:normal; } }
+
   </style>
 
   <!-- ============ HERO ============ -->
   <section class="section container pd-hero">
     <a class="backlink" href="index.html#projects">← Back to projects</a>
-    <span class="section-label">// project deep-dive</span>
+    <span class="section-label" style="display:block">// project deep-dive</span>
     <h1 class="pd-title">MPC Trajectory Tracking &amp; <em>Roll Avoidance</em></h1>
-    <p class="pd-lede">A real-time nonlinear model-predictive controller that plans and tracks
-      trajectories for a three-wheeled autonomous pod, <b>keeping it stable at the edge of vehicle
-      dynamics</b>. Structured and unstructured local planning, closed-loop in the CARLA simulator.</p>
+    <p class="pd-lede">I built a nonlinear model predictive controller (NMPC) that follows a planned path
+      for a small three-wheeled pod <b>without letting it tip over in corners</b>. It runs in real time
+      and I test it closed-loop in the CARLA simulator.</p>
     <div class="pd-tags">
       <span class="ptag">NMPC</span><span class="ptag">Roll Avoidance</span>
-      <span class="ptag">Vehicle Dynamics</span><span class="ptag">acados</span>
-      <span class="ptag">CARLA</span><span class="ptag">Motion Planning</span>
+      <span class="ptag">Active Anti-Roll Bar</span><span class="ptag">Vehicle Dynamics</span>
+      <span class="ptag">acados</span><span class="ptag">CARLA</span><span class="ptag">Space-Time Hybrid A*</span>
     </div>
   </section>
 
@@ -768,74 +792,68 @@
       <span class="section-label">// 01 · overview</span>
       <div class="section-line"></div>
     </div>
-    <h2 style="margin-bottom:36px; letter-spacing:-1.5px;">Plan a path, respect the vehicle</h2>
+    <h2 style="margin-bottom:36px; letter-spacing:-1.5px;">Follow the path, respect the vehicle</h2>
     <div class="detail-grid-3">
       <div class="dcol reveal">
         <div class="kick">The vehicle</div>
         <h3>A tadpole pod</h3>
-        <p>A lightweight three-wheeled vehicle — two steered wheels at the front, one at the rear.
-          Its narrow track and single rear contact patch make grip and rollover the central
-          stability concern, so the controller has to plan against those limits directly.</p>
+        <p>A light three-wheeler with two steered wheels at the front and one at the back. The narrow
+          track and single rear wheel mean tipping over is a bigger worry than running out of grip.</p>
       </div>
       <div class="dcol reveal">
         <div class="kick">The problem</div>
-        <h3>Safety at the edge</h3>
-        <p>Track a planned path accurately while staying inside tire grip, steering and force
-          limits, and — critically — a lateral-acceleration envelope that keeps the pod from
-          tipping. Every constraint is re-evaluated at a 20&nbsp;ms control rate.</p>
+        <h3>Staying safe at the limit</h3>
+        <p>The pod has to follow its path closely while staying within tire grip, steering and force
+          limits, and a cornering limit that keeps it from tipping. All of this is rechecked every
+          20&nbsp;ms.</p>
       </div>
       <div class="dcol reveal">
         <div class="kick">The approach</div>
         <h3>Plan, then optimize</h3>
-        <p>A local planner proposes a drivable path; the NMPC optimizes steering and longitudinal
-          force over a short horizon to follow it, subject to the friction and roll limits; an
-          allocation layer maps the result onto the vehicle.</p>
+        <p>A local planner gives a path and a speed plan. The NMPC works out the steering and
+          drive/brake force to follow it within those limits, and an allocation layer turns that into
+          commands for each wheel.</p>
       </div>
     </div>
   </section>
 
   <!-- ============ THE ROLL LIMIT ============ -->
-  <section class="section container">
+  <section class="section container" id="roll-control">
     <div class="section-header">
-      <span class="section-label">// 02 · the roll limit</span>
+      <span class="section-label">// 02 · roll control</span>
       <div class="section-line"></div>
     </div>
-    <h2 style="margin-bottom:18px; letter-spacing:-1.5px;">Where the lateral-acceleration limit comes from</h2>
+    <h2 style="margin-bottom:18px; letter-spacing:-1.5px;">Where the cornering limit comes from</h2>
 
-    <p class="pd-lede" style="margin-bottom:30px;">The NMPC never reasons about rollover directly.
-      Each step it consumes a single scalar — the limiting lateral acceleration
-      \(a_y^{\lim}\) — and enforces it as a heavy Soft constraint on the predicted motion. That scalar is
-      produced by a standalone <b>geometry-based roll-avoidance algorithm</b> that treats the pod as a
-      rigid body and works from its wheel geometry plus a live estimate of the center of gravity.</p>
+    <p class="pd-lede" style="margin-bottom:30px;">The NMPC doesn't model rollover itself. Every step
+      it gets one number, the highest lateral acceleration the pod can safely take, \(a_{y,\max}\), and
+      keeps its predicted cornering below it. I work that number out from the <b>wheel geometry and the
+      position of the center of gravity (CG)</b>, treating the pod as a rigid body.</p>
 
     <div class="detail-grid-3" style="margin-bottom:34px;">
       <div class="dcol reveal">
-        <div class="kick">The tipping axis</div>
-        <h3>Not a symmetric base</h3>
-        <p>On a tadpole the support polygon is a triangle — two front contact patches, one at the
-          rear. In a turn the pod rolls about the line joining the <em>outer front</em> wheel to the
-          <em>single rear</em> wheel: a diagonal axis, not the vehicle centerline.</p>
+        <div class="kick">The tipping line</div>
+        <h3>It's not the centerline</h3>
+        <p>The wheels form a triangle, so in a turn the pod tips over the line from the
+          <em>outer front</em> tire to the <em>rear</em> tire, not over its centerline.</p>
       </div>
       <div class="dcol reveal">
-        <div class="kick">Rigid-body model</div>
-        <h3>Static threshold</h3>
-        <p>Suspension compliance and transient load transfer are set aside; the limit is the steady
-          rigid-body point at which the weight vector reaches the tipping axis. It is conservative and
-          cheap enough to recompute inside the control loop.</p>
+        <div class="kick">Rigid body</div>
+        <h3>A simple threshold</h3>
+        <p>The limit is the point where the weight can no longer hold the pod down about that line.
+          It's quick enough to recalculate inside the control loop.</p>
       </div>
       <div class="dcol reveal">
         <div class="kick">Live CG</div>
-        <h3>Inertial sensing</h3>
-        <p>Inertial sensors track dynamic in-plane migration of the CG, so the moment arm reflects the
-          current load state. Because the pod is loaded from the top in a fixed configuration, CG
-          shifts along the vertical (Z) axis are held constant and ignored.</p>
+        <h3>From the IMU</h3>
+        <p>The pod's sensors track how the CG moves forward, back and sideways as the load changes. The
+          pod is always loaded the same way from the top, so I treat CG height as fixed.</p>
       </div>
     </div>
 
-    <!-- original geometry schematic -->
     <div class="geo-fig reveal">
       <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" role="img"
-           aria-label="Left: top view of a tadpole three-wheeler showing the tipping axis from the outer front wheel to the rear wheel, the CG, and the perpendicular moment arm d. Right: rear view showing CG height h and road bank angle phi.">
+           aria-label="Left: top view of a tadpole three-wheeler showing the tipping axis from the outer front wheel to the rear wheel, the CG, front track T and wheelbase l. Right: rear view showing CG height H and road bank angle.">
         <defs>
           <marker id="ah" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
             <path d="M0,0 L7,3.5 L0,7 Z" fill="#63b3ed"/>
@@ -869,9 +887,6 @@
         <!-- tipping axis: outer-front → rear -->
         <line x1="245" y1="80" x2="170" y2="235" stroke="#4fd1c5" stroke-width="2.2" stroke-dasharray="7 5"/>
         <text x="252" y="168" class="lbl" fill="#4fd1c5">tipping axis</text>
-        <!-- moment arm d (CG → foot on axis) -->
-        <line x1="170" y1="150" x2="203" y2="166" stroke="#63b3ed" stroke-width="1.8" marker-end="url(#ah)"/>
-        <text x="176" y="140" class="lbl" fill="#63b3ed">d</text>
         <!-- CG -->
         <circle cx="170" cy="150" r="5.5" fill="#f6c90e"/>
         <text x="150" y="146" class="lbl" fill="#f6c90e">CG</text>
@@ -880,10 +895,10 @@
         <text x="200" y="143" class="lbl">a_y</text>
         <!-- front track dimension -->
         <line x1="95" y1="56" x2="245" y2="56" stroke="#6b8aa8" stroke-width="1" marker-start="url(#ahm)" marker-end="url(#ahm)"/>
-        <text x="152" y="50" class="lblm">t_f</text>
+        <text x="160" y="50" class="lblm">T</text>
         <!-- wheelbase dimension -->
         <line x1="58" y1="80" x2="58" y2="235" stroke="#6b8aa8" stroke-width="1" marker-start="url(#ahm)" marker-end="url(#ahm)"/>
-        <text x="40" y="162" class="lblm">L</text>
+        <text x="42" y="162" class="lblm">l</text>
 
         <!-- ── RIGHT: REAR VIEW ── -->
         <text x="420" y="34" class="ttl">rear view (banked)</text>
@@ -893,7 +908,7 @@
         <line x1="440" y1="235" x2="672" y2="200" stroke="#4fd1c5" stroke-width="2"/>
         <!-- bank angle arc -->
         <path d="M472,222 A32,32 0 0,0 470,217" fill="none" stroke="#4fd1c5" stroke-width="1.4"/>
-        <text x="478" y="216" class="lbl" fill="#4fd1c5">φ</text>
+        <text x="478" y="216" class="lbl" fill="#4fd1c5">φ_r</text>
         <!-- vehicle body (tilted with road) -->
         <polygon points="512,222 620,206 623,172 515,188" fill="rgba(99,179,237,0.06)"
                  stroke="#6b8aa8" stroke-width="1.3"/>
@@ -904,76 +919,387 @@
         <circle cx="566" cy="192" r="5.5" fill="#f6c90e"/>
         <text x="574" y="190" class="lbl" fill="#f6c90e">CG</text>
         <line x1="566" y1="214" x2="566" y2="198" stroke="#63b3ed" stroke-width="1.6" marker-end="url(#ah)"/>
-        <text x="540" y="210" class="lbl" fill="#63b3ed">h</text>
+        <text x="540" y="210" class="lbl" fill="#63b3ed">H</text>
         <!-- weight + lateral accel at CG -->
         <line x1="566" y1="192" x2="566" y2="240" stroke="#6b8aa8" stroke-width="1.4" marker-end="url(#ahm)"/>
         <text x="572" y="236" class="lblm">mg</text>
         <line x1="566" y1="192" x2="612" y2="185" stroke="#63b3ed" stroke-width="1.5" marker-end="url(#ah)"/>
         <text x="600" y="178" class="lbl">a_y</text>
       </svg>
-      <div class="rc">Tadpole tipping geometry — the roll axis runs from the outer front contact patch
-        to the single rear wheel; \(d\) is the perpendicular distance from the CG to that axis and
-        \(h\) its height above the road plane. Original schematic.</div>
+      <div class="rc">The pod tips over the line from the outer front tire to the rear tire. \(T\) is the
+        front track, \(l\) the wheelbase, \(b\) the distance from the CG back to the rear wheel, and \(H\)
+        the CG height.</div>
     </div>
 
-    <p class="roll-note" style="margin:0 0 8px;">On flat ground, rollover impends when the overturning
-      moment from the lateral inertial force acting at CG height \(h\) equals the restoring moment of
-      the weight acting at the moment arm \(d\). Setting \(m\,a_y\,h = m\,g\,d\) and resolving \(d\) for
-      the tadpole geometry gives:</p>
+    <p class="roll-note" style="margin:0 0 8px;">The limit is the lateral acceleration at which the
+      inner front wheel's load reaches zero. I get it in three short steps, starting on a flat road with
+      the body treated as rigid.</p>
 
     <div class="eq-wrap">
       <div class="eq-card reveal">
-        <div class="eq-label">flat ground — rollover threshold</div>
+        <div class="eq-label">1 · load on the front axle (moments about the rear tire, side view)</div>
         \[
-          a_y^{\lim} \;=\; \frac{g}{h}\,d
-          \;=\; \frac{g}{h}\cdot\frac{\tfrac{t_f}{2}\,b}{\sqrt{L^{2}+\left(\tfrac{t_f}{2}\right)^{2}}}
-          \;\approx\; \frac{g\,t_f\,b}{2\,h\,L}
+          F_{front} \;=\; \frac{m\,(g\,b - a_x H)}{l}
+        \]
+      </div>
+      <div class="eq-card reveal">
+        <div class="eq-label">2 · load moved from the inner to the outer front wheel (front view)</div>
+        \[
+          \Delta F \;=\; \frac{2\,m\,a_y H}{T}
+        \]
+      </div>
+      <div class="eq-card reveal">
+        <div class="eq-label">3 · inner wheel lifts when ΔF = F<sub>front</sub></div>
+        \[
+          a_{y,\lim} \;=\; \frac{T\,(g\,b - a_x H)}{2\,l\,H}
+          \qquad\Rightarrow\qquad a_x = 0:\;\; \frac{g\,T\,b}{2\,H\,l} \approx 5.31~\text{m/s}^2
+        \]
+      </div>
+    </div>
+
+    <p class="roll-note" style="margin:20px 0 8px;">Two things stand out. The \(b/l\) term is what makes
+      a tadpole different: if the CG moves back toward the single rear wheel, the limit drops fast. And
+      longitudinal acceleration matters, because accelerating takes load off the front axle. Each
+      1&nbsp;m/s² of throttle costs roughly 0.4&nbsp;m/s² of cornering limit, while braking adds margin.
+      You get the same answer by taking moments about the diagonal tipping line directly. The angle of
+      the line cancels out, which is why it doesn't appear in the result.</p>
+
+    <p class="roll-note" style="margin:0 0 8px;">Real suspension lets the body lean, which shifts the
+      sprung mass outward and adds load transfer. With the body rolling in proportion to cornering
+      (\(\varphi = R\,a_y\)), and adding road bank, grade and body pitch, the full limit is:</p>
+
+    <div class="eq-wrap">
+      <div class="eq-card reveal">
+        <div class="eq-label">general form (lift-off, steady state)</div>
+        \[
+          a_{y,\lim} \;=\; \frac{T\,\big[\,m g b\cos\varphi_r\cos\theta_r \;-\; mH\,(a_x - g\sin\theta_r) \;+\; m_s g h_s'\,\theta\cos\theta_r\,\big]}
+          {2\,l\,\big(mH + m_s g h_s R\cos\varphi_r\big)} \;-\; g\sin\varphi_r
         \]
       </div>
     </div>
 
     <ul class="sym-list">
-      <li><b>g</b> gravitational acceleration</li>
-      <li><b>h</b> CG height above the road plane</li>
-      <li><b>t_f</b> front track width</li>
-      <li><b>L</b> wheelbase (front axle → rear wheel)</li>
-      <li><b>b</b> longitudinal CG-to-rear-wheel distance</li>
-      <li><b>d</b> perpendicular CG-to-tipping-axis distance</li>
-      <li><b>φ</b> road bank angle (favorable positive)</li>
-      <li><b>θ</b> road grade (longitudinal slope)</li>
+      <li><b>m, m_s</b> total mass, sprung (body) mass</li>
+      <li><b>H</b> CG height</li>
+      <li><b>T</b> front track width</li>
+      <li><b>l</b> wheelbase</li>
+      <li><b>b</b> distance from CG back to the rear wheel</li>
+      <li><b>h_s</b> body CG height above the roll axis</li>
+      <li><b>R</b> roll gradient: body roll per m/s² of cornering (0 for a rigid body)</li>
+      <li><b>a_x</b> longitudinal accel. (+ when speeding up)</li>
+      <li><b>φ_r</b> road bank (+ when it tips the pod outward)</li>
+      <li><b>θ_r, θ</b> road grade (+ downhill), body pitch</li>
     </ul>
 
-    <p class="roll-note" style="margin:24px 0 8px;">The \(b/L\) factor is what separates the tadpole
-      from a symmetric vehicle: as the CG migrates toward the single rear wheel (\(b\to 0\)) the margin
-      collapses, while a CG near the wide front track (\(b\to L\)) recovers the full \(g\,t_f/2h\)
-      limit. Road configuration then reshapes the balance — a favorable bank angle \(\phi\) contributes
-      a restoring gravity component, while a grade \(\theta\) reduces the effective normal load:</p>
+    <p class="roll-note" style="margin:22px 0 0;">The NMPC gets a lateral limit with margin built in. I
+      take the lift-off limit for the worst case the pod will meet and keep about 20% of the inner wheel's
+      load in reserve. With passive suspension, 2&nbsp;m/s² of acceleration and a flat road, that's
+      3.87&nbsp;×&nbsp;0.8 ≈ 3.1&nbsp;m/s², so the NMPC's 3.0&nbsp;m/s² limit holds up. The load-transfer
+      terms follow the tadpole rollover index in
+      <a href="https://www.researchgate.net/publication/315903416_Rollover_stabilities_of_three-wheeled_vehicles_including_road_configuration_effects"
+      target="_blank" rel="noopener">“Rollover Stabilities of Three-Wheeled Vehicles Including Road
+      Configuration Effects”</a> by Ataei, Khajepour and Jeon; the roll substitution and the solved limit
+      are mine.</p>
 
+    <!-- active anti-roll bar -->
+    <h3 class="subhead" id="anti-roll-bar">Adding an active anti-roll bar</h3>
+    <p class="roll-note" style="margin:0 0 12px;">The general form shows that body lean costs margin. When
+      the body rolls in a corner, its weight shifts toward the outside wheel, and the inner front wheel
+      gets closer to lifting. A stiffer passive suspension would help, but it makes the ride harsh. So
+      I'm adding a motor-driven anti-roll bar on the front axle. It has to go at the front, because the
+      single rear wheel sits in the middle and can't resist roll at all.</p>
+
+    <p class="roll-note" style="margin:0 0 8px;">I model the body as a single roll degree of freedom:
+      roll inertia, damping and stiffness, pushed by cornering and resisted by the bar's moment \(M\).
+      Gravity pulling on the leaning body works against the springs, so the effective stiffness \(K'\) is a
+      bit lower than the springs alone.</p>
     <div class="eq-wrap">
       <div class="eq-card reveal">
-        <div class="eq-label">banked &amp; sloped road — road-plane balance</div>
+        <div class="eq-label">roll model</div>
         \[
-          a_y^{\lim} \;=\; g\,\cos\theta\left(\frac{d}{h}\cos\phi \;+\; \sin\phi\right)
+          I_\varphi\,\ddot\varphi + c_\varphi\,\dot\varphi + K'\varphi \;=\; m_s h_s\,a_y - M
+        \]
+      </div>
+      <div class="eq-card reveal">
+        <div class="eq-label">bar moment — feedforward + feedback</div>
+        \[
+          M \;=\; \underbrace{(m_s h_s - K' R_{des})\,a_y}_{\text{feedforward}}
+          \;+\; \underbrace{K_p\,(\varphi - R_{des}\,a_y) \;+\; K_d\,\dot\varphi}_{\text{feedback}}
         \]
       </div>
     </div>
 
-    <p class="roll-note" style="margin:22px 0 0;">The same rigid-body construction is evaluated for
-      flat, sloped, and banked surfaces, and the tightest limit for the current road configuration is
-      handed to the NMPC as \(a_y^{\lim}\). The road-configuration treatment follows the rigid-body
-      rollover analysis in <a href="https://www.researchgate.net/publication/315903416_Rollover_stabilities_of_three-wheeled_vehicles_including_road_configuration_effects"
-      target="_blank" rel="noopener">“Rollover Stabilities of Three-Wheeled Vehicles Including Road
-      Configuration Effects.”</a></p>
+    <div class="usage">
+      <div class="usebox reveal">
+        <h4>Feedforward sets how far the body leans</h4>
+        <p>I pick a target roll gradient \(R_{des}\), a fraction of the passive lean, so the driver still
+          feels a little roll. From the lateral acceleration the NMPC is about to command, the feedforward
+          applies exactly the moment needed to hold that lean in a steady corner. It acts before the body
+          moves, and it does most of the work.</p>
+      </div>
+      <div class="usebox reveal">
+        <h4>Feedback reshapes the suspension</h4>
+        <p>The feedback gains act like extra suspension in software. The roll-angle gain \(K_p\) adds roll
+          <em>stiffness</em>, and the roll-rate gain \(K_d\) adds roll <em>damping</em>. They don't change the
+          steady lean, which the feedforward already sets. They change how the body moves when it gets
+          there: how fast it settles, and how much it rocks after a quick turn-in.</p>
+      </div>
+    </div>
 
-    <div class="refnote">Note: the equations above are the standard rigid-body rollover relations,
-      derived here for the tadpole tipping axis — not reproduced from the reference. The paper is
-      cited for its flat/slope/banking road-configuration framework.</div>
+    <p class="roll-note" style="margin:22px 0 8px;">Putting the controller into the roll model shows this
+      directly. The feedback terms simply add to the hardware's stiffness and damping:</p>
+    <div class="eq-wrap">
+      <div class="eq-card reveal">
+        <div class="eq-label">closed loop — effective suspension</div>
+        \[
+          I_\varphi\,\ddot\varphi \;+\; (c_\varphi + K_d)\,\dot\varphi \;+\; (K' + K_p)\,\varphi \;=\; \text{input}
+          \qquad\Rightarrow\qquad
+          K_p = I_\varphi\,\omega_n^2 - K', \quad K_d = 2\zeta\omega_n I_\varphi - c_\varphi
+        \]
+      </div>
+    </div>
+    <p class="roll-note" style="margin:18px 0 12px;">So tuning comes down to choosing the roll behaviour I
+      want, a natural frequency \(\omega_n\) and damping ratio \(\zeta\), and solving for the two gains
+      that turn the real suspension into that one. The frequency has to stay above the passive roll
+      frequency (or \(K_p\) would go negative and soften the car), below wheel hop, and within the
+      actuator's bandwidth. The damping ratio sets how much the body overshoots after a quick steering
+      input. Raising it too far amplifies gyro noise through \(K_d\).</p>
+
+    <p class="roll-note" style="margin:0 0 12px;">The motor command is the total moment divided by the
+      bar's linkage ratio, clamped to the actuator's limit and rate-limited. Driving straight it commands
+      zero, so a bump under one wheel isn't pushed across to the other. The bar can only stop the body
+      leaning, not change the geometry, so it works alongside the NMPC's lateral limit. If it fails, the pod
+      falls back to passive suspension, which the NMPC limit still covers. Near lift-off, the rollover index
+      freezes the feedback, and if the wheel lifts, the torque ramps down.</p>
+
+    <div class="refnote">Next step: measure the real CG height, roll stiffness and damping on the pod, then
+      check the feedforward on a steady circle and the feedback gains with a parked hold-and-release test
+      and a step steer.</div>
+  </section>
+
+  <!-- ============ RUNNING THE NMPC ============ -->
+  <section class="section container" id="running-nmpc">
+    <div class="section-header">
+      <span class="section-label">// 03 · running the nmpc</span>
+      <div class="section-line"></div>
+    </div>
+    <h2 style="margin-bottom:18px; letter-spacing:-1.5px;">How the controller runs each cycle</h2>
+
+    <p class="pd-lede" style="margin-bottom:30px;">The NMPC runs every <b>20&nbsp;ms</b>, but a new target
+      trajectory only arrives every <b>100&nbsp;ms</b>. In between, the controller has to know where the pod
+      is on the current trajectory, rebuild its reference from there, and solve fast enough to send a
+      command before the next cycle.</p>
+
+    <div class="flow-fig reveal">
+      <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="Each 20 ms cycle: target trajectory at 100 ms and Kalman filter pose feed a projection step, which sets up a local frame zeroed at the current pose, builds the reference, solves the NMPC with acados and HPIPM, and sends steering, force and yaw-moment commands.">
+        <defs>
+          <marker id="na" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#63b3ed"/></marker>
+        </defs>
+        <style>
+          .nb  { fill:#0c1628; stroke:rgba(99,179,237,0.35); stroke-width:1.2; }
+          .nbs { fill:#0c1628; stroke:#4fd1c5; stroke-width:1.4; }
+          .n1  { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; fill:#dce8f5; }
+          .n2  { font-family:'DM Mono',monospace; font-size:10px; fill:#6b8aa8; }
+        </style>
+        <rect x="14" y="22" width="132" height="64" rx="10" class="nb"/>
+        <text x="26" y="46" class="n1">Target trajectory</text>
+        <text x="26" y="64" class="n2">every 100 ms</text>
+        <text x="26" y="77" class="n2">t s X Y ψ κ v a</text>
+        <rect x="14" y="114" width="132" height="64" rx="10" class="nb"/>
+        <text x="26" y="138" class="n1">Kalman filter</text>
+        <text x="26" y="156" class="n2">IMU + GPS + wheels</text>
+        <text x="26" y="169" class="n2">pose, Vx, Vy, r</text>
+        <line x1="146" y1="54"  x2="176" y2="92"  stroke="#63b3ed" stroke-width="1.3" marker-end="url(#na)"/>
+        <line x1="146" y1="146" x2="176" y2="108" stroke="#63b3ed" stroke-width="1.3" marker-end="url(#na)"/>
+        <rect x="180" y="68" width="120" height="64" rx="10" class="nbs"/>
+        <text x="192" y="92" class="n1">Project</text>
+        <text x="192" y="110" class="n2">find s on the</text>
+        <text x="192" y="123" class="n2">trajectory</text>
+        <rect x="320" y="68" width="120" height="64" rx="10" class="nbs"/>
+        <text x="332" y="92" class="n1">Local frame</text>
+        <text x="332" y="110" class="n2">pose → (0, 0, 0)</text>
+        <text x="332" y="123" class="n2">ref. moved in</text>
+        <rect x="460" y="68" width="120" height="64" rx="10" class="nbs"/>
+        <text x="472" y="92" class="n1">Solve</text>
+        <text x="472" y="110" class="n2">acados SQP-RTI</text>
+        <text x="472" y="123" class="n2">HPIPM QP</text>
+        <rect x="600" y="68" width="106" height="64" rx="10" class="nb"/>
+        <text x="612" y="92" class="n1">Commands</text>
+        <text x="612" y="110" class="n2">steer, force,</text>
+        <text x="612" y="123" class="n2">yaw moment</text>
+        <line x1="300" y1="100" x2="316" y2="100" stroke="#63b3ed" stroke-width="1.3" marker-end="url(#na)"/>
+        <line x1="440" y1="100" x2="456" y2="100" stroke="#63b3ed" stroke-width="1.3" marker-end="url(#na)"/>
+        <line x1="580" y1="100" x2="596" y2="100" stroke="#63b3ed" stroke-width="1.3" marker-end="url(#na)"/>
+        <text x="320" y="164" class="n2">repeated every 20 ms</text>
+      </svg>
+      <div class="rc">One control cycle. The trajectory arrives five times slower than the controller runs,
+        so every cycle starts by working out where the pod is on it.</div>
+    </div>
+
+    <h3 class="subhead">What comes in over Ethernet</h3>
+    <p class="roll-note" style="margin:0 0 8px;">The planning (ADAS) computer sends two messages over
+      automotive Ethernet every 100&nbsp;ms: the target trajectory and its own pose estimate. The
+      trajectory message is a header followed by a list of points.</p>
+
+    <div class="tbl-wrap reveal">
+      <table class="pd-table">
+        <thead><tr><th>Trajectory header</th><th>What it's for</th></tr></thead>
+        <tbody>
+          <tr><td>creation_timestamp</td><td>When the planner finished building it. Freshness is judged from this, not from when it arrived.</td></tr>
+          <tr><td>trajectory_start_timestamp</td><td>The absolute time that matches the first point. Every point's time is relative to this.</td></tr>
+          <tr><td>validity_duration</td><td>How long the trajectory may be used before it counts as stale</td></tr>
+          <tr><td>frame_id, session_id</td><td>Which coordinate frame and session it belongs to. A mismatch means it's rejected.</td></tr>
+          <tr><td>planner_status</td><td>Normal, degraded, fallback or invalid, plus a reason if degraded</td></tr>
+          <tr><td>maneuver_type</td><td>Lane keep, lane change, stop or emergency, used for sanity checks (for example, a stop with a rising speed target is rejected)</td></tr>
+          <tr><td>sequence counter, CRC</td><td>Catches lost, repeated, out-of-order or corrupted messages</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tbl-wrap reveal">
+      <table class="pd-table">
+        <thead><tr><th>Each trajectory point</th><th>What it's for</th></tr></thead>
+        <tbody>
+          <tr><td>t</td><td>Time after the start timestamp when the pod should be at this point</td></tr>
+          <tr><td>s</td><td>Distance along the trajectory. Having both t and s lets me track progress by time and by position.</td></tr>
+          <tr><td>X, Y, ψ</td><td>Position and heading</td></tr>
+          <tr><td>κ</td><td>Curvature, for the steering feedforward and the speed limit in curves</td></tr>
+          <tr><td>v, a</td><td>Target speed and acceleration request, for the speed reference and force feedforward</td></tr>
+          <tr><td>jerk, dκ/ds</td><td>Optional, when the planner provides them</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="roll-note" style="margin:6px 0 16px;">A trajectory is usually 20 to 50 points. At 40 points
+      that's about 1.3&nbsp;kB, roughly 15&nbsp;kB/s at 10&nbsp;Hz, which is tiny for the link.</p>
+
+    <div class="tbl-wrap reveal">
+      <table class="pd-table">
+        <thead><tr><th>Pose message</th><th>What it's for</th></tr></thead>
+        <tbody>
+          <tr><td>measurement_timestamp</td><td>When the pose was measured</td></tr>
+          <tr><td>frame_id, session_id</td><td>Must match the trajectory's frame</td></tr>
+          <tr><td>X, Y, ψ, v<sub>x</sub>, v<sub>y</sub>, r</td><td>The planner's pose, speeds and yaw rate</td></tr>
+          <tr><td>covariance, localization status</td><td>How much to trust it</td></tr>
+          <tr><td>sequence counter</td><td>Its own loss and order check</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="roll-note" style="margin:6px 0 16px;">I don't use the planner's pose to set up the NMPC frame.
+      It can be up to 100&nbsp;ms old, which is 2&nbsp;m of error at 20&nbsp;m/s. Instead it goes into my own
+      Kalman filter as a measurement and a consistency check.</p>
+
+    <p class="roll-note" style="margin:6px 0 0;">Before a trajectory is used, it has to pass the checks: fresh
+      enough, the right frame and session, a counter in order, a valid CRC, a good planner status, and
+      values that make sense for the manoeuvre. Points are matched to my clock by timestamp, not by arrival
+      time, so network delay doesn't turn into a position offset. When I build the reference from waypoints
+      myself instead, I fit a cubic spline, compute curvature from it, and run a three-pass speed profile.</p>
+
+    <h3 class="subhead">Pose from the Kalman filter, and finding the start point</h3>
+    <p class="roll-note" style="margin:0 0 12px;">An EKF fuses the IMU, GPS and wheel speeds to give the
+      pod's position, heading, forward and sideways speed, and yaw rate. Each cycle I take that fused pose
+      at the rear axle and <em>project it onto the trajectory</em> to find how far along it the pod is.
+      That distance is where the NMPC's reference starts.</p>
+    <p class="roll-note" style="margin:0 0 12px;">Projection on its own can jump, for example where the path
+      loops back near itself. So progress is tracked two ways: predicted forward in time from the last
+      known point, then corrected by the projected pose. The search is seeded from the last value and
+      checked against heading, so it can't snap to a different part of the path.</p>
+    <p class="roll-note" style="margin:0;">Between trajectory updates, the filter keeps propagating the pose,
+      so the controller always starts from where the pod is now, not where it was when the trajectory was
+      sent.</p>
+
+    <h3 class="subhead">Zeroing out the current pose</h3>
+    <p class="roll-note" style="margin:0 0 12px;">Instead of solving in a fixed world frame, every cycle I
+      set up a fresh local frame <em>anchored at the pod's current fused pose</em>. In that frame the pod
+      always starts at x&nbsp;=&nbsp;0, y&nbsp;=&nbsp;0, heading&nbsp;=&nbsp;0, and the reference points
+      ahead are moved into it. Only the position and heading are zeroed. Speeds, yaw rate and actuator
+      states carry over as measured.</p>
+    <div class="usage">
+      <div class="usebox reveal">
+        <h4>Why do it</h4>
+        <p>Coordinates stay small, so the solver stays well-conditioned. Heading never wraps around
+          ±180°. And errors from a world-frame offset can't build up over a long drive.</p>
+      </div>
+      <div class="usebox reveal">
+        <h4>Keeping it consistent</h4>
+        <p>The frame is fixed for the whole solve, across every SQP iteration in that cycle. To warm-start
+          the next cycle, I shift the previous inputs one step and re-simulate the states in the new
+          frame, so the solver starts close to the answer.</p>
+      </div>
+    </div>
+
+    <h3 class="subhead">The optimal control problem and solver</h3>
+    <p class="roll-note" style="margin:0 0 12px;">The model has 12 states: rear-axle position and heading,
+      forward and sideways speed, yaw rate, and the achieved and commanded steering angle, longitudinal
+      force and yaw moment. The inputs are the <em>rates</em> of the three commands, which keeps steering and
+      braking smooth. The yaw moment comes from braking the two front wheels differently. Tires use a
+      combined-slip model, and road drag and rolling resistance are part of the dynamics.</p>
+    <p class="roll-note" style="margin:0 0 12px;">The cost is a least-squares sum of normalized errors:
+      cross-track, along-track, heading, speed, sideslip, yaw rate against its reference, steering and force
+      against their feedforward, lateral acceleration as a fraction of its limit, and the input rates. The
+      main constraints are the lateral-acceleration limit from section&nbsp;02, a grip limit on each tire
+      with some margin, and front-wheel forces that can only brake. Both limits are soft constraints with
+      very heavy, tightly bounded slack, so the QP never becomes infeasible.</p>
+    <div class="tbl-wrap reveal">
+      <table class="pd-table">
+        <thead><tr><th>Piece</th><th>What I use</th></tr></thead>
+        <tbody>
+          <tr><td>Modelling</td><td>CasADi, with acados generating C code for the solver</td></tr>
+          <tr><td>NLP method</td><td>SQP-RTI (one real-time iteration per cycle), with Gauss-Newton Hessian. I tested full SQP with several iterations during tuning.</td></tr>
+          <tr><td>QP solver</td><td>HPIPM (interior point, partial condensing) for the closed loop. I also compared an active-set QP solver (qpOASES).</td></tr>
+          <tr><td>Integrator</td><td>Explicit Runge-Kutta, with per-stage durations</td></tr>
+          <tr><td>Horizon</td><td>40 stages, 0.8 to 1.6&nbsp;s depending on speed</td></tr>
+          <tr><td>Robustness</td><td>Minimum-speed floor on 1/v<sub>x</sub> terms, and a fallback command if the solver returns a bad status</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="roll-note" style="margin:10px 0 0;">The model is built and the C code generated once in Python
+      on my machine. Only the compiled C runs in the loop, which is what makes it portable to embedded
+      targets.</p>
+
+    <h3 class="subhead">What I measure</h3>
+    <div class="tbl-wrap reveal">
+      <table class="pd-table">
+        <thead><tr><th>Metric</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>Curvature tracking error (RMS)</td><td>under 0.010&nbsp;1/m</td></tr>
+          <tr><td>Peak lateral acceleration</td><td>at or below 3.0&nbsp;m/s²</td></tr>
+          <tr><td>Speed tracking error on straights (RMS)</td><td>under 1.0&nbsp;m/s</td></tr>
+          <tr><td>Cross-track and heading error</td><td>logged every cycle and checked per run</td></tr>
+          <tr><td>Comfort braking</td><td>no deceleration beyond 3.5&nbsp;m/s² outside emergencies</td></tr>
+          <tr><td>Solve time and solver status</td><td>inside the 20&nbsp;ms budget, with failed or step-limited solves counted</td></tr>
+          <tr><td>Smoothness</td><td>steps in the acceleration reference and steering steadiness</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ LOCAL PLANNING ============ -->
+  <section class="section container" id="local-planner">
+    <div class="section-header">
+      <span class="section-label">// 04 · local planning</span>
+      <div class="section-line"></div>
+    </div>
+    <h2 style="margin-bottom:18px; letter-spacing:-1.5px;">Space-time Hybrid A*</h2>
+    <p class="pd-lede" style="margin-bottom:18px;">My first planner found a path and only afterwards
+      worked out when the pod would get to each point. If that path crossed an oncoming car, all it could
+      do was throw the path away. So I added <b>time and speed to the Hybrid A* search</b>. Now the planner
+      can come back with a plan like "slow down, wait for that car, then pass", not just a shape to
+      drive.</p>
+    <p class="roll-note" style="margin:0 0 12px;">It predicts where nearby cars will be over the next few
+      seconds and only accepts moves that stay clear of them at that moment. If a simple lane-change path already
+      looks fine and only the timing is the problem, it keeps the shape and just changes the timing.
+      Otherwise it runs the full search. The NMPC then follows the shape of the path and its speed plan,
+      stops wherever the plan says to wait, and never gets ahead of the plan. Getting ahead would make the
+      planner's checks against other cars meaningless.</p>
+    <p class="roll-note" style="margin:0;">At the 9&nbsp;m/s design speed it drives all four CARLA test towns
+      without a collision. I'm now working on making it hold up at 15&nbsp;m/s in heavy traffic.</p>
   </section>
 
   <!-- ============ CAPABILITIES ============ -->
   <section class="section container">
     <div class="section-header">
-      <span class="section-label">// 03 · under the hood</span>
+      <span class="section-label">// 05 · under the hood</span>
       <div class="section-line"></div>
     </div>
     <h2 style="margin-bottom:36px; letter-spacing:-1.5px;">The rest of the stack</h2>
@@ -981,30 +1307,31 @@
       <div class="project-card reveal">
         <div class="project-icon">🎯</div>
         <h3>Pose-tracking NMPC</h3>
-        <p>An 11-state predictive controller tracks cross-track error, heading, and speed directly,
-          re-solving a constrained optimization every control step in real time with acados / SQP.</p>
+        <p>A 12-state model of the pod tracks position, heading and speed directly. It re-solves the
+          optimization every control step with acados, and takes steering, force and braking rates as
+          its inputs so the commands stay smooth.</p>
         <div class="project-tags"><span class="ptag">acados</span><span class="ptag">SQP</span><span class="ptag">CasADi</span></div>
       </div>
       <div class="project-card reveal anim-delay-1">
         <div class="project-icon">⚙️</div>
         <h3>Friction-ellipse tire model</h3>
-        <p>A combined-slip model couples lateral and longitudinal forces, with per-wheel constraints
-          that keep every tire inside its friction ellipse — grip honoured alongside the roll limit.</p>
+        <p>The tire model links cornering and braking forces, and each tire is kept inside its
+          friction ellipse, so the controller respects grip as well as the roll limit.</p>
         <div class="project-tags"><span class="ptag">Combined slip</span><span class="ptag">Friction circle</span></div>
       </div>
       <div class="project-card reveal anim-delay-2">
         <div class="project-icon">🧭</div>
-        <h3>Two local planners</h3>
-        <p>A Frenet lattice for structured lane-keeping and overtaking, and a Hybrid A* search for
-          unstructured obstacle fields and tight maneuvers — both feeding the same NMPC through one
-          path interface.</p>
-        <div class="project-tags"><span class="ptag">Frenet</span><span class="ptag">Hybrid A*</span></div>
+        <h3>Space-time Hybrid A* planner</h3>
+        <p>Searches over time as well as position, so it can plan to wait for an oncoming car and then
+          pass. It gives the NMPC a path plus a speed plan
+          (<a href="#local-planner" style="color:var(--accent);text-decoration:none">section&nbsp;04</a>).</p>
+        <div class="project-tags"><span class="ptag">Space-time Hybrid A*</span><span class="ptag">Traffic prediction</span></div>
       </div>
       <div class="project-card reveal anim-delay-3">
         <div class="project-icon">📉</div>
-        <h3>Offset-free longitudinal</h3>
-        <p>A disturbance observer estimates unmodeled road load and feeds it back, so speed tracking
-          stays accurate despite plant/simulator mismatch.</p>
+        <h3>Offset-free speed control</h3>
+        <p>An observer estimates road load that the model doesn't capture and corrects for it, so
+          speed tracking stays accurate even though the simulator doesn't match my model exactly.</p>
         <div class="project-tags"><span class="ptag">Disturbance obs.</span><span class="ptag">Speed tracking</span></div>
       </div>
     </div>
@@ -1013,46 +1340,45 @@
   <!-- ============ RESULTS ============ -->
   <section class="section container">
     <div class="section-header">
-      <span class="section-label">// 04 · closed-loop results</span>
+      <span class="section-label">// 06 · closed-loop results</span>
       <div class="section-line"></div>
     </div>
     <h2 style="margin-bottom:30px; letter-spacing:-1.5px;">Running in CARLA</h2>
 
-    <p class="pd-lede" style="margin-bottom:26px;">Closed-loop demos with the live telemetry
-      dashboard — the pod tracking its planned path in CARLA next to real-time plots of speed,
-      steering, curvature, tracking error, and per-wheel friction utilization.</p>
+    <p class="pd-lede" style="margin-bottom:26px;">Here's the pod driving in CARLA next to my live
+      telemetry dashboard, showing speed, steering, curvature, tracking error and how much grip each
+      tire is using.</p>
 
-    <!-- CARLA simulation demo videos -->
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:20px; margin-bottom:20px;">
-      <div class="result-wrap reveal" style="background:#000;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:20px; margin-bottom:20px;">
+      <div class="result-wrap reveal">
         <video controls preload="metadata" playsinline poster="assets/carla-demo-1-poster.jpg"
                style="width:100%; display:block; background:#000;">
           <source src="assets/carla-demo-1.mp4" type="video/mp4" />
           <a href="assets/carla-demo-1.mp4" style="color:var(--accent)">download the clip</a>.
         </video>
-        <div class="rc">Live telemetry &amp; CARLA — speed, steering, curvature, tracking error, and
-          the friction circle as the pod drives.&nbsp; <span style="color:var(--accent2)"></span></div>
+        <div class="rc">Live telemetry next to CARLA: speed, steering,
+          curvature, tracking error and the friction circle.</div>
       </div>
-      <div class="result-wrap reveal" style="background:#000;">
+      <div class="result-wrap reveal">
         <video controls preload="metadata" playsinline poster="assets/carla-demo-2-poster.jpg"
                style="width:100%; display:block; background:#000;">
           <source src="assets/carla-demo-2.mp4" type="video/mp4" />
           <a href="assets/carla-demo-2.mp4" style="color:var(--accent)">download the clip</a>.
         </video>
-        <div class="rc">Tracking through curves — the planned path and per-wheel friction
-          utilization as the pod corners.&nbsp; <span style="color:var(--accent2)"></span></div>
+        <div class="rc">Following the path through curves, with grip use
+          at each wheel.</div>
       </div>
     </div>
 
     <div class="result-wrap reveal">
       <img src="assets/nmpc_carla_results.png" alt="CARLA closed-loop telemetry: speed tracking, curvature tracking, steering, lateral acceleration within limits, longitudinal force decomposition, and disturbance estimate over a 50-second run." />
-      <div class="rc">50&nbsp;s closed-loop run at a 9.0&nbsp;m/s target — speed, curvature, and steering
-        tracking with lateral acceleration held inside the ±3&nbsp;m/s² envelope.</div>
+      <div class="rc">A 50&nbsp;s run with a 9&nbsp;m/s target. Speed, curvature and steering track well, and
+        cornering stays inside ±3&nbsp;m/s².</div>
     </div>
     <div class="stat-row">
       <div class="stat-box reveal"><div class="sv">±3<small> m/s²</small></div><div class="sl">lateral accel</div></div>
       <div class="stat-box reveal"><div class="sv">20<small> ms</small></div><div class="sl">solve + control</div></div>
-      <div class="stat-box reveal"><div class="sv">11</div><div class="sl">model states</div></div>
+      <div class="stat-box reveal"><div class="sv">12</div><div class="sl">model states</div></div>
       <div class="stat-box reveal"><div class="sv">50<small> s</small></div><div class="sl">closed-loop run</div></div>
     </div>
 
